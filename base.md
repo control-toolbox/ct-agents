@@ -19,9 +19,11 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 
 ## Git & commits
 
-- **Never commit or push without explicit user approval.** Even after validated work,
-  ask before `git commit`/`git push`. An approval given for one piece of work does not
-  extend to the next.
+- **Never commit or push without approval.** In local mode, ask in the session before
+  `git commit`/`git push`, even after validated work; an approval given for one piece of
+  work does not extend to the next. In remote mode, the agent works on a dedicated
+  branch of a draft PR and the orchestration pushes; approval is the human review of
+  that PR, before merge.
 - Do not commit on the default branch: branch off the correct base.
 - Prefer the `gh` CLI for GitHub operations (PRs, issues).
 - End commit messages with the required `Co-Authored-By` trailer; end PR bodies with

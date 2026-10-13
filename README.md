@@ -18,6 +18,25 @@ never copies them.
 > **Status.** Documentation only: the agent base, one harness adapter, one setup note
 > and one recipe, moved out of the former Handbook. Roles and workflows come later.
 
+## Two modes, one base
+
+An agent runs in one of two modes, and every role must work in both:
+
+| | Local | Remote |
+| --- | --- | --- |
+| Where | a session on a developer's machine (Claude Code, …) | a CI runner (GitHub Actions + an agent engine) |
+| Who drives | the developer, turn by turn | an orchestration script, from an issue or a queue |
+| Approval | asked in the session before any commit or push | given by human review of a draft PR |
+| Trace | the conversation, plus the plan | issue, branch, run log, draft PR, summary comment |
+
+What changes between the modes is **who approves and where the trace lives**, not
+what the agent does: [`base.md`](base.md), the roles and the recipes are shared, and the
+mode-specific parts are confined to [`adapters/`](adapters/) and to the orchestration.
+A role written for one mode only is a defect.
+
+Today only the local mode is described. The remote mode — orchestration, queue, run
+log — comes with the first roles; `ocourses/agents` is its reference implementation.
+
 ## Contents
 
 | File | Content |
