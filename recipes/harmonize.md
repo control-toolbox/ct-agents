@@ -15,12 +15,9 @@ remote mode.
 | --- | --- | --- | --- | --- |
 | 1 | Pin ct-conventions, `AGENTS.md`, `CLAUDE.md` | [`pin-conventions.md`](pin-conventions.md) | one PR per package | — |
 | 2 | Labels | [`labels.md`](labels.md) | a plan validated by the human, then repository settings (no PR) | — |
-| 3 | Issue and PR templates | [`issue-templates.md`](issue-templates.md) | one PR on `control-toolbox/.github`, then one PR per package | 2, and the first PR merged |
-| 4 | Typo and lint configuration | *to be specified after a survey* | | |
-| 5 | Obsolete repository automation | *to be specified after a survey* | | |
-
-Themes 4 and 5 are in the scope of the issues but have not been surveyed. Do not invent
-them: stop and report.
+| 3 | Issue and PR templates, code of conduct | [`issue-templates.md`](issue-templates.md) | one PR on `control-toolbox/.github`, then one PR per package | 2, and the first PR merged |
+| 4 | Typo and lint configuration | [`lint-and-automation.md`](lint-and-automation.md) | one PR per package with theme 5, or a comment if nothing to do | — |
+| 5 | Obsolete repository automation | [`lint-and-automation.md`](lint-and-automation.md) | same PR as theme 4 | — |
 
 Model for a package: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull/595)
 (theme 1).
