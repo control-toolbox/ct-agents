@@ -9,32 +9,72 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
 
 ## Inputs
 
-- `PKG` — the package directory (e.g. `CTModels.jl`).
+- `PKG` — the package directory name under `control-toolbox/` (e.g. `CTModels.jl`).
+- `REPO` — its GitHub repository (e.g. `control-toolbox/CTModels.jl`).
 - `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
 
 ## Ground rules
 
-- Work in a fresh worktree or clone from `main`; never on a feature branch of someone
-  else, never with uncommitted changes around.
-- Branch `chore/pin-ct-conventions`. Commits and PR title in English, `docs:` prefix.
+- Work in a fresh worktree created from `origin/main` (step 1), never in the package
+  directory itself: it may be on someone else's feature branch, with uncommitted changes.
+- Branch `chore/pin-ct-conventions`. Commits, PR title, PR body and issue comments in
+  English, `docs:` prefix.
 - Open a PR and stop. **Never merge**: the human merges.
 - Do not edit history: leave past entries of `CHANGELOG.md` and `BREAKING.md` as they
   are, even where they say "Handbook".
-- No source change. If a step would touch `src/` or `ext/` code (not comments), stop and
-  report.
+- No source change. If a step would touch code (see the end of step 4), stop and report.
+- Always link the PR to the existing issues and comment on them (step 0 and step 7).
 
 ## Steps
 
-1. **Submodule.**
+0. **Find the issues about this work.** Each package has an open issue
+   "[Chore] Harmonize repository metadata and Handbook integration with CTBase". It asks
+   for much more than this recipe covers: labels, issue and PR templates, the Handbook
+   submodule, the guidance files (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`), typo/lint
+   configuration, obsolete automation. This recipe covers only the submodule, the guidance
+   files and the references.
+
+   Known on 2026-10-14 (search again, the list may have changed):
+
+   | Package | Issue |
+   | --- | --- |
+   | CTModels.jl | control-toolbox/CTModels.jl#442 |
+   | CTSolvers | control-toolbox/CTSolvers.jl#246 |
+   | CTFlows.jl | control-toolbox/CTFlows.jl#460 |
+   | CTDirect.jl | control-toolbox/CTDirect.jl#642 |
+   | CTParser.jl | control-toolbox/CTParser.jl#358 |
+   | CTLie | control-toolbox/CTLie#48 |
+   | OptimalControl | control-toolbox/OptimalControl.jl#982 |
+
+   Also list the related open issues, without closing them: an "Enforce Handbook tenet 2:
+   `using`, never `import`" issue is open in CTParser.jl (#303) and OptimalControl.jl
+   (#831); `[Roadmap]` issues may mention the Handbook too.
 
    ```bash
-   git checkout main && git pull
-   git checkout -b chore/pin-ct-conventions
+   gh issue list -R "$REPO" --state open --limit 100 \
+     --search "Handbook OR AGENTS.md OR conventions OR submodule" \
+     --json number,title,assignees --jq '.[]|"#\(.number) \(.title) [\([.assignees[].login]|join(","))]"'
+   ```
+
+   Read each one. Note which of its scope items this PR will cover. Do not start if the
+   package already has an open PR for the same work (`gh pr list -R "$REPO" --search
+   "conventions OR Handbook"`): report it instead.
+
+1. **Worktree and submodule.** Worktrees live in `control-toolbox/.worktrees/`, named
+   `<PKG>-<topic>`.
+
+   ```bash
+   cd "<control-toolbox>/$PKG"
+   git fetch origin
+   git worktree add "../.worktrees/$PKG-pin-conventions" -b chore/pin-ct-conventions origin/main
+   cd "../.worktrees/$PKG-pin-conventions"
    # only if the package has a .handbook submodule:
    git submodule deinit -f .handbook && git rm -f .handbook && rm -rf .git/modules/.handbook
    git submodule add https://github.com/control-toolbox/ct-conventions.git .conventions
    git -C .conventions checkout "$TAG"
    ```
+
+   Do not commit or edit anything in `<control-toolbox>/$PKG` itself.
 
 2. **`AGENTS.md`.** Rewrite it from the template below. Keep any section that is specific
    to this package (its own layout, commands, pitfalls) after `Key Conventions`. If a
@@ -112,15 +152,46 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
    git submodule status                      # .conventions at $TAG
    grep -rnI "\.handbook" . --exclude-dir=.git --exclude-dir=.conventions \
      | grep -v "^./CHANGELOG.md\|^./BREAKING.md"     # nothing
-   git diff --stat main -- src ext            # no code change (comments only, if any)
+   git diff --stat origin/main -- src ext     # no code change (comments only, if any)
    ```
 
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
    ct-conventions), and the docs build in draft mode if `docs/make.jl` was touched.
 
-7. **PR.** Commit, push, open the PR against `main`, one line per paragraph in the body
-   (GitHub renders line breaks), ending with the generation note. Report: the files
-   changed, anything left as is and why, and the check results. Do not merge.
+7. **PR and issues.** Commit in small commits, push, and open the PR against `main`. One
+   line per paragraph in the body (GitHub renders line breaks), ending with the generation
+   note. In the body, link the issue of step 0:
+
+   - `Refs #N` for the "Harmonize" issue — **not** `Closes`, unless this PR covers every
+     item of its scope (labels, templates, PR template, submodule, guidance files, typo
+     configuration, obsolete automation). In practice it does not: leave the issue open.
+   - `Refs #M` for each related issue this PR touches. Never close an issue you did not
+     fully resolve.
+
+   Then comment on each linked issue, in English:
+
+   ```markdown
+   Opened <PR URL>: pins ct-conventions <TAG> in `.conventions/`, rewrites `AGENTS.md` to
+   cite rule identifiers, makes `CLAUDE.md` a redirect and updates the references to the
+   Handbook.
+   Covered from the scope: submodule, guidance files, typo configuration.
+   Not covered here: <the remaining items, e.g. labels, issue templates, PR template>.
+   ```
+
+   Also add a comment on the PR itself listing the issues it relates to, so that the link
+   is visible from both sides.
+
+   Report to the user: the files changed, anything left as is and why, the check results,
+   the PR URL and the issues commented. Do not merge.
+
+8. **Clean up.** Once the human has merged (not before):
+
+   ```bash
+   cd "<control-toolbox>/$PKG"
+   git worktree remove --force "../.worktrees/$PKG-pin-conventions"   # --force: it contains a submodule
+   git worktree prune
+   git branch -D chore/pin-ct-conventions
+   ```
 
 ## `AGENTS.md` template
 
@@ -181,8 +252,11 @@ How agents behave on these repositories is described in
 
 ## Stop and report when
 
-- the package is not on `main`, or has uncommitted changes;
+- a PR for the same work is already open on the package;
 - `AGENTS.md` has a package-specific section that contradicts a rule;
 - a Handbook reference has no matching rule in the correspondence table;
 - a step would change code, not comments;
 - the checks of step 6 fail.
+
+Whenever you stop, comment on the "Harmonize" issue with the reason (and the state of the
+worktree), so that the stop is visible there.
