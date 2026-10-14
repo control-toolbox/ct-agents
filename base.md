@@ -11,20 +11,19 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 - Follow the procedures of
   [`method.md`](https://github.com/control-toolbox/ct-conventions/blob/main/method.md)
   for tests, coverage, docs builds and output capture.
-- For a non-trivial task, write a plan from
+- For a substantial piece of work, a plan following
   [`plan-template.md`](https://github.com/control-toolbox/ct-conventions/blob/main/plan-template.md)
-  and get it confirmed before touching files.
+  helps align with the maintainer first; a small or clear task does not need one.
 - State the conventions version you apply in plans and reports
   (`git -C .conventions describe --tags --always`), and cite rules by identifier.
 
 ## Git & commits
 
-- **Never commit or push without approval.** In local mode, ask in the session before
-  `git commit`/`git push`, even after validated work; an approval given for one piece of
-  work does not extend to the next. In remote mode, the agent works on a dedicated
-  branch of a draft PR and the orchestration pushes; approval is the human review of
-  that PR, before merge.
-- Do not commit on the default branch: branch off the correct base.
+- **The human merges.** An agent never merges a pull request, in either mode. In remote
+  mode, the agent works on a dedicated branch of a draft PR and the orchestration pushes;
+  the human review of that PR is the approval.
+- Commit regularly, in small commits. Do not commit on the default branch: branch off
+  the correct base.
 - Prefer the `gh` CLI for GitHub operations (PRs, issues).
 - End commit messages with the required `Co-Authored-By` trailer; end PR bodies with
   the required generation note.

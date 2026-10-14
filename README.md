@@ -44,6 +44,7 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`base.md`](base.md) | Behavior shared by every agent, whatever the harness: reading the conventions, git, editing, asking vs proceeding |
 | [`adapters/claude-code.md`](adapters/claude-code.md) | Claude Code specifics: background test runs with `Monitor` |
 | [`setup/github-pat.md`](setup/github-pat.md) | GitHub MCP server and fine-grained personal access tokens |
+| [`recipes/pin-conventions.md`](recipes/pin-conventions.md) | Pinning ct-conventions in a package: submodule, `AGENTS.md`, `CLAUDE.md`, references |
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
 
 ## Layout
