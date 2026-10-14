@@ -102,6 +102,17 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    What may be edited: Markdown, comments and docstrings, `@testset` names, and strings
    printed by probe scripts (report the latter). Anything else is code: stop and report.
 
+   **A reference that states a fact about the code is not evidence of that fact.** Some
+   references are not citations but claims ("Docstrings deferred (Handbook convention)",
+   "not yet implemented", "see the Handbook, this is a known deviation"). Check the claim
+   against the code before copying it into a new citation, and say how you checked in the
+   step 4 comment. Example: five files of CTModels carried "Docstrings deferred" while
+   every symbol had a docstring (`Base.Docs.meta(CTModels.PlotCase)`; the comment was
+   written in the same commit as the docstrings). If the claim is false, remove the
+   comment; if it is true, keep it, cite the rule, and list it in the final comment as a
+   standing deviation for the human to decide on; if you cannot tell, leave it and report
+   it. Never invent an explanation.
+
 5. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
    ct-conventions pinned in `.conventions/` at `$TAG`, `AGENTS.md` cites rules by
    identifier, references updated. Keep the `✅ Compatibility` footer ("No breaking
