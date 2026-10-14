@@ -113,15 +113,40 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    standing deviation for the human to decide on; if you cannot tell, leave it and report
    it. Never invent an explanation.
 
-5. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
+5. **`CONTRIBUTING.md`.** The contributor guide must say how to get and bump the
+   submodule. If it has no `## Developer Resources` section, add this one at the end,
+   after a `---` separator (copy it from CTBase.jl); if it has one, make sure it contains
+   this text and replace any older text about the Handbook:
+
+   ```markdown
+   ---
+
+   ## Developer Resources
+
+   The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is a git submodule in `.conventions/`, pinned to a SemVer release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` in an existing clone.
+
+   To bump it, run `git -C .conventions fetch --tags && git -C .conventions checkout <tag>`, then commit the updated pointer.
+   ```
+
+   The `README.md` is generated from `CONTRIBUTING.md` by the UpdateReadme workflow: do
+   not edit `README.md` by hand.
+
+6. **`_typos.toml`.** The submodule must not be spell-checked. In the `extend-exclude`
+   list of `[files]`, add `".conventions/",` (CTBase.jl has it). If the file or the list
+   does not exist, create it with that entry only, and say so in the comment. Do not touch
+   the other entries.
+
+7. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
    ct-conventions pinned in `.conventions/` at `$TAG`, `AGENTS.md` cites rules by
    identifier, references updated. Keep the `✅ Compatibility` footer ("No breaking
    changes").
 
-6. **Check.** Paste each command's output as is:
+8. **Check.** Paste each command's output as is:
 
    ```bash
    git submodule status                                    # .conventions at $TAG
+   grep -c 'ct-conventions' CONTRIBUTING.md                # at least 1
+   grep -n 'conventions' _typos.toml                       # the .conventions/ exclusion
    grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
    git diff --stat origin/main -- src ext                  # only comment lines, if any
    git diff origin/main -- src ext | grep '^[+-][^+-]' | grep -v '^[+-][[:space:]]*#' | wc -l   # 0
@@ -194,5 +219,5 @@ How agents behave on these repositories is described in
 - `AGENTS.md` has a package-specific section that contradicts a rule;
 - a Handbook reference has no matching rule in the correspondence table;
 - a step would change code, not comments;
-- the checks of step 6 fail;
+- the checks of step 8 fail;
 - and in the cases listed in `harmonize.md`.
