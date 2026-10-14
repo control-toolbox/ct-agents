@@ -11,9 +11,9 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 - Follow the procedures of
   [`method.md`](https://github.com/control-toolbox/ct-conventions/blob/main/method.md)
   for tests, coverage, docs builds and output capture.
-- For a substantial piece of work, a plan following
+- **Local mode:** before working on code, propose a plan following
   [`plan-template.md`](https://github.com/control-toolbox/ct-conventions/blob/main/plan-template.md)
-  helps align with the maintainer first; a small or clear task does not need one.
+  and wait for confirmation. **Remote mode:** the process is still to be defined.
 - State the conventions version you apply in plans and reports
   (`git -C .conventions describe --tags --always`), and cite rules by identifier.
 
