@@ -27,7 +27,9 @@ Model for a package: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.j
 
 ## Inputs
 
-- `PKG` — the package directory name under `control-toolbox/` (e.g. `CTModels.jl`).
+- `ROOT` — the directory that contains all the packages and `.worktrees/` (e.g.
+  `/Users/ocots/Research/logiciels/dev/control-toolbox`).
+- `PKG` — the package directory name under `ROOT` (e.g. `CTModels.jl`).
 - `REPO` — its GitHub repository (e.g. `control-toolbox/CTModels.jl`).
 - `THEME` — the theme recipe to run, and its parameters (e.g. `TAG` for theme 1).
 
@@ -35,13 +37,22 @@ Model for a package: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.j
 
 - Work in a fresh worktree created from `origin/main` (step B), never in the package
   directory itself: it may be on someone else's feature branch, with uncommitted changes.
+  The worktree path is **`$ROOT/.worktrees/$PKG-<theme>`**, never inside `$ROOT/$PKG/`
+  (a `.worktrees/` folder there shows up as untracked in the package).
 - One branch and one PR per theme, named `chore/<theme>`. Commits, PR title, PR body and
   comments in English, `docs:` or `chore:` prefix.
 - Open the PR and stop. **Never merge**: the human merges.
 - Do not edit history: leave past entries of `CHANGELOG.md` and `BREAKING.md` as they
   are.
 - No source change. If a step would touch code, stop and report.
+- **One commit per step** of the theme recipe, pushed right after the step, so that the
+  history follows the narration.
 - Link every PR to the existing issues, comment on them, and narrate the work on the PR.
+- **A check that finds nothing proves nothing until it is shown to find something.**
+  Before the work, run each search on the unmodified code (`origin/main`) and report the
+  count, which must be above zero when the thing searched for exists; after the work,
+  report the count again. Never write commands with backslash-escaped quotes in a
+  comment: they are copied and run as is.
 
 ## Protocol
 
@@ -74,16 +85,17 @@ Read each one. Do not start if the package already has an open PR for the same t
 
 ### B. Worktree
 
-Worktrees live in `control-toolbox/.worktrees/`, named `<PKG>-<theme>`.
+Worktrees live in `$ROOT/.worktrees/`, named `<PKG>-<theme>`.
 
 ```bash
-cd "<control-toolbox>/$PKG"
-git fetch origin
-git worktree add "../.worktrees/$PKG-<theme>" -b chore/<theme> origin/main
-cd "../.worktrees/$PKG-<theme>"
+git -C "$ROOT/$PKG" status --short > "/tmp/$PKG-status-before.txt"   # snapshot, to compare at the end
+git -C "$ROOT/$PKG" fetch origin
+git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-<theme>" -b chore/<theme> origin/main
+cd "$ROOT/.worktrees/$PKG-<theme>"
 ```
 
-Do not commit or edit anything in `<control-toolbox>/$PKG` itself.
+Do not commit or edit anything in `$ROOT/$PKG` itself. At the end, `git -C "$ROOT/$PKG"
+status --short` must be identical to the snapshot; paste both in the final comment.
 
 ### C. Run the theme recipe
 
@@ -120,8 +132,8 @@ files changed, anything left as is and why, check results, PR URL, issues commen
 Once the human has merged (not before):
 
 ```bash
-cd "<control-toolbox>/$PKG"
-git worktree remove --force "../.worktrees/$PKG-<theme>"   # --force: it may contain a submodule
+cd "$ROOT/$PKG"
+git worktree remove --force "$ROOT/.worktrees/$PKG-<theme>"   # --force: it may contain a submodule
 git worktree prune
 git branch -D chore/<theme>
 ```
@@ -135,7 +147,8 @@ line breaks; it ends with the generation note).
 
 1. **Open the PR as a Draft right after the first commit**, and push after each following
    step.
-2. **Post one comment per step** of the theme recipe, right after finishing it:
+2. **Post one comment per step** of the theme recipe, right after pushing that step's
+   commit. Comments posted all at once at the end are not narration:
 
    ```markdown
    **Step <N> — <title>.**

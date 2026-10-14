@@ -40,12 +40,24 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    @AGENTS.md
    ```
 
-4. **References to the Handbook.** Find them:
+4. **References to the Handbook.** Count them **before** changing anything, on the
+   unmodified code, and list them:
 
    ```bash
-   grep -rnI "Handbook\|\.handbook" . --exclude-dir=.git --exclude-dir=.conventions \
-     | grep -v "^./CHANGELOG.md\|^./BREAKING.md"
+   git grep -nIi handbook origin/main -- . ':!CHANGELOG.md' ':!BREAKING.md' | wc -l   # BEFORE
+   git grep -nIi handbook origin/main -- . ':!CHANGELOG.md' ':!BREAKING.md'           # the list
    ```
+
+   The count is above zero for every package (the `.handbook` and `Handbook` spellings
+   both match). If it is zero, the command is wrong or the package is already done: stop
+   and report. After the replacements, the same search on the working tree must find
+   nothing:
+
+   ```bash
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # AFTER
+   ```
+
+   Report both counts in the step 4 comment, and the list as `old → new (rule)`.
 
    and replace each by its new form. Links to the old `philosophy/<file>.md` pages become
    links to `rules/<new file>.md` of ct-conventions, with the identifier when the sentence
@@ -95,17 +107,19 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    identifier, references updated. Keep the `✅ Compatibility` footer ("No breaking
    changes").
 
-6. **Check.**
+6. **Check.** Paste each command's output as is:
 
    ```bash
-   git submodule status                      # .conventions at $TAG
-   grep -rnI "\.handbook" . --exclude-dir=.git --exclude-dir=.conventions \
-     | grep -v "^./CHANGELOG.md\|^./BREAKING.md"     # nothing
-   git diff --stat origin/main -- src ext     # no code change (comments only, if any)
+   git submodule status                                    # .conventions at $TAG
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
+   git diff --stat origin/main -- src ext                  # only comment lines, if any
+   git diff origin/main -- src ext | grep '^[+-][^+-]' | grep -v '^[+-][[:space:]]*#' | wc -l   # 0
+   git -C "$ROOT/$PKG" status --short | diff - "/tmp/$PKG-status-before.txt"   # no output
    ```
 
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
-   ct-conventions), and the docs build in draft mode if `docs/make.jl` was touched.
+   ct-conventions), and the docs build in draft mode if `docs/make.jl` or a guide was
+   touched.
 
 ## `AGENTS.md` template
 
