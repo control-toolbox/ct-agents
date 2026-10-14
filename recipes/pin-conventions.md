@@ -1,83 +1,29 @@
-# Recipe: pin ct-conventions in a package
+# Recipe: pin ct-conventions in a package (theme 1)
+
+Part of [`harmonize.md`](harmonize.md): read its ground rules, protocol (issues, worktree,
+linking) and narration first. This file only holds what is specific to theme 1.
 
 Align one control-toolbox package on [ct-conventions](https://github.com/control-toolbox/ct-conventions):
 a pinned `.conventions/` submodule, an `AGENTS.md` that cites rule identifiers, a
-`CLAUDE.md` that only redirects. Mechanical and checkable: meant to be run by a simple
-agent, one package at a time, in local or remote mode.
+`CLAUDE.md` that only redirects. Mechanical and checkable.
 
 Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull/595).
 
 ## Inputs
 
-- `PKG` — the package directory name under `control-toolbox/` (e.g. `CTModels.jl`).
-- `REPO` — its GitHub repository (e.g. `control-toolbox/CTModels.jl`).
-- `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
-
-## Ground rules
-
-- Work in a fresh worktree created from `origin/main` (step 1), never in the package
-  directory itself: it may be on someone else's feature branch, with uncommitted changes.
-- Branch `chore/pin-ct-conventions`. Commits, PR title, PR body and issue comments in
-  English, `docs:` prefix.
-- Open a PR and stop. **Never merge**: the human merges.
-- Do not edit history: leave past entries of `CHANGELOG.md` and `BREAKING.md` as they
-  are, even where they say "Handbook".
-- No source change. If a step would touch code (see the end of step 4), stop and report.
-- Always link the PR to the existing issues and comment on them (step 0 and step 7).
-- **Narrate the work on the PR** (see "Narrating the work"): the PR comments are the
-  record from which the work is reviewed afterwards. A claim in a comment that the diff
-  does not show is a defect.
+`PKG`, `REPO`, and `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
+Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-conventions`.
 
 ## Steps
 
-0. **Find the issues about this work.** Each package has an open issue
-   "[Chore] Harmonize repository metadata and Handbook integration with CTBase". It asks
-   for much more than this recipe covers: labels, issue and PR templates, the Handbook
-   submodule, the guidance files (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`), typo/lint
-   configuration, obsolete automation. This recipe covers only the submodule, the guidance
-   files and the references.
-
-   Known on 2026-10-14 (search again, the list may have changed):
-
-   | Package | Issue |
-   | --- | --- |
-   | CTModels.jl | control-toolbox/CTModels.jl#442 |
-   | CTSolvers | control-toolbox/CTSolvers.jl#246 |
-   | CTFlows.jl | control-toolbox/CTFlows.jl#460 |
-   | CTDirect.jl | control-toolbox/CTDirect.jl#642 |
-   | CTParser.jl | control-toolbox/CTParser.jl#358 |
-   | CTLie | control-toolbox/CTLie#48 |
-   | OptimalControl | control-toolbox/OptimalControl.jl#982 |
-
-   Also list the related open issues, without closing them: an "Enforce Handbook tenet 2:
-   `using`, never `import`" issue is open in CTParser.jl (#303) and OptimalControl.jl
-   (#831); `[Roadmap]` issues may mention the Handbook too.
+1. **Submodule.** In the worktree (protocol step B):
 
    ```bash
-   gh issue list -R "$REPO" --state open --limit 100 \
-     --search "Handbook OR AGENTS.md OR conventions OR submodule" \
-     --json number,title,assignees --jq '.[]|"#\(.number) \(.title) [\([.assignees[].login]|join(","))]"'
-   ```
-
-   Read each one. Note which of its scope items this PR will cover. Do not start if the
-   package already has an open PR for the same work (`gh pr list -R "$REPO" --search
-   "conventions OR Handbook"`): report it instead.
-
-1. **Worktree and submodule.** Worktrees live in `control-toolbox/.worktrees/`, named
-   `<PKG>-<topic>`.
-
-   ```bash
-   cd "<control-toolbox>/$PKG"
-   git fetch origin
-   git worktree add "../.worktrees/$PKG-pin-conventions" -b chore/pin-ct-conventions origin/main
-   cd "../.worktrees/$PKG-pin-conventions"
    # only if the package has a .handbook submodule:
    git submodule deinit -f .handbook && git rm -f .handbook && rm -rf .git/modules/.handbook
    git submodule add https://github.com/control-toolbox/ct-conventions.git .conventions
    git -C .conventions checkout "$TAG"
    ```
-
-   Do not commit or edit anything in `<control-toolbox>/$PKG` itself.
 
 2. **`AGENTS.md`.** Rewrite it from the template below. Keep any section that is specific
    to this package (its own layout, commands, pitfalls) after `Key Conventions`. If a
@@ -161,70 +107,6 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
    ct-conventions), and the docs build in draft mode if `docs/make.jl` was touched.
 
-7. **PR and issues.** Commit in small commits and push. The PR is open as a Draft since
-   step 2 (see "Narrating the work"); mark it ready for review after the final comment.
-   Its body has one line per paragraph (GitHub renders line breaks), ends with the
-   generation note, and links the issue of step 0:
-
-   - `Refs #N` for the "Harmonize" issue — **not** `Closes`, unless this PR covers every
-     item of its scope (labels, templates, PR template, submodule, guidance files, typo
-     configuration, obsolete automation). In practice it does not: leave the issue open.
-   - `Refs #M` for each related issue this PR touches. Never close an issue you did not
-     fully resolve.
-
-   Then comment on each linked issue, in English:
-
-   ```markdown
-   Opened <PR URL>: pins ct-conventions <TAG> in `.conventions/`, rewrites `AGENTS.md` to
-   cite rule identifiers, makes `CLAUDE.md` a redirect and updates the references to the
-   Handbook.
-   Covered from the scope: submodule, guidance files, typo configuration.
-   Not covered here: <the remaining items, e.g. labels, issue templates, PR template>.
-   ```
-
-   Also add a comment on the PR itself listing the issues it relates to, so that the link
-   is visible from both sides.
-
-   Report to the user: the files changed, anything left as is and why, the check results,
-   the PR URL and the issues commented. Do not merge.
-
-8. **Clean up.** Once the human has merged (not before):
-
-   ```bash
-   cd "<control-toolbox>/$PKG"
-   git worktree remove --force "../.worktrees/$PKG-pin-conventions"   # --force: it contains a submodule
-   git worktree prune
-   git branch -D chore/pin-ct-conventions
-   ```
-
-## Narrating the work
-
-The work is reviewed afterwards by reading the PR comments and then checking them against
-the diff. So the agent explains what it does as it goes, in English, as comments on the
-PR (not in the description, which stays short).
-
-1. **Open the PR as a Draft right after the first commit** (end of step 2), with the body
-   described in step 7, and push after each following step.
-2. **Post one comment per step**, right after finishing it:
-
-   ```markdown
-   **Step <N> — <title>.**
-   Done: <what was changed, in one or two sentences>.
-   Files: <list of files touched>.
-   Decisions: <each choice that was not dictated by the recipe, and why>.
-   Left as is: <anything found and not changed, with file:line and the reason>.
-   Check: `<command>` → <actual result>.
-   ```
-
-3. **Step 4 in detail.** List every reference found by the `grep`, grouped by file, as
-   `old → new (rule)`, and every one left as is with the reason. The reviewer must be able
-   to tell that none was missed.
-4. **Final comment, before marking the PR ready:** a summary with the checklist of the
-   recipe steps (done / not applicable / stopped), the output of the step 6 checks pasted
-   as is, the issues linked and commented, and the open questions for the human.
-5. Never describe a check that was not run. If a check could not run (no `meta` suite, no
-   Julia available), say so.
-
 ## `AGENTS.md` template
 
 ````markdown
@@ -284,11 +166,8 @@ How agents behave on these repositories is described in
 
 ## Stop and report when
 
-- a PR for the same work is already open on the package;
 - `AGENTS.md` has a package-specific section that contradicts a rule;
 - a Handbook reference has no matching rule in the correspondence table;
 - a step would change code, not comments;
-- the checks of step 6 fail.
-
-Whenever you stop, comment on the "Harmonize" issue with the reason (and the state of the
-worktree), so that the stop is visible there.
+- the checks of step 6 fail;
+- and in the cases listed in `harmonize.md`.
