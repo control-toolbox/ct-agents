@@ -23,37 +23,14 @@ Depends on [`labels.md`](labels.md): the templates apply the labels `bug`, `feat
 `documentation`, `dev` and `release`, which must exist in every repository (GitHub
 ignores a label that does not exist).
 
-## Part I — once, in `control-toolbox/.github`
+## Part I — done, in `control-toolbox/.github`
 
-Not per package. Run it once, in a worktree of that repository, as theme 3.
-
-1. **Source.** The templates of CTBase.jl on `main` (they come from commit `fe5de01b`): `bug.yml`,
-   `feature.yml`, `developer.md`, `documentation.md`, `release.md` and
-   `pull_request_template.md`.
-2. **Copy** them to the `.github` repository:
-
-   ```text
-   .github/ISSUE_TEMPLATE/bug.yml
-   .github/ISSUE_TEMPLATE/feature.yml
-   .github/ISSUE_TEMPLATE/developer.md
-   .github/ISSUE_TEMPLATE/documentation.md
-   .github/ISSUE_TEMPLATE/release.md
-   .github/ISSUE_TEMPLATE/config.yml
-   .github/pull_request_template.md
-   ```
-
-3. **`config.yml`.** `blank_issues_enabled: false`, and the contact links that make sense
-   for the whole organization (the organization's Discussions). Remove the link that
-   names a package.
-4. **Make the content generic.** It must read correctly for any package: no package name,
-   no link to a package-specific file. Known case: `release.md` says "Prepare a CTBase
-   release" in `about:`; write "Prepare a release". The release steps differ between the
-   packages today (compare `.github/ISSUE_TEMPLATE/release.md` in each: CTBase,
-   CTModels, CTSolvers, CTFlows, CTLie, OptimalControl have different versions, CTDirect
-   and CTParser have none). **Stop and ask the human** which release checklist is the
-   reference before choosing one, and say so in a comment on the PR.
-5. Open the PR on `control-toolbox/.github`, narrate it, and stop. The human merges.
-   Record the merge in the tracking comment of every "Harmonize" issue.
+The organization's templates live in
+[`control-toolbox/.github/.github/`](https://github.com/control-toolbox/.github/tree/main/.github)
+(control-toolbox/.github#1, #2). They come from CTBase.jl, the reference chosen by the
+maintainer, made generic: a `Package` dropdown instead of CTBase's areas, only the
+organization's Discussions link in `config.yml`, "Prepare a release", no assignee. A change
+to a template is made there, once, for every package.
 
 ## Part II — per package, after Part I is merged and theme 2 is done
 
@@ -65,17 +42,26 @@ Not per package. Run it once, in a worktree of that repository, as theme 3.
    git rm -f .github/pull_request_template.md   # if it exists
    ```
 
-   A package that has a template that is not one of the organization's (for instance a
-   specific form) keeps it **and the whole folder**, which disables the defaults: stop and
-   report, the human decides.
-3. **Check after the merge**, not before (the defaults apply to the default branch):
+   A "blank issue" template (`blank-issue.md`, "Blank template for general issue") is
+   removed too: blank issues are disabled organization-wide and `developer.md` covers
+   general internal work. Any other template that is not one of the organization's (for
+   instance a specific form) would keep the whole folder, which disables the defaults:
+   stop and report, the human decides (the usual answer is to add it to
+   `control-toolbox/.github` for every package).
+
+   In the PR, list each removed file with the organization template that replaces it.
+3. **Check after the merge**, not before (the defaults apply to the default branch).
+   The PR template, from the API:
 
    ```bash
-   curl -s "https://github.com/$REPO/issues/new/choose" | grep -o 'Bug report\|Feature request\|Developer\|Documentation suggestion\|Release' | sort -u
+   gh api "repos/$REPO/community/profile" --jq .files.pull_request_template.html_url
    ```
 
-   Paste the result in a comment on the issue: the five templates must be offered.
-   `https://github.com/$REPO/compare` must show the PR template when opening a PR.
+   must point to `control-toolbox/.github`. The issue templates have no API and the
+   page `https://github.com/$REPO/issues/new/choose` redirects to the login page without
+   a session, so `curl` cannot check them: ask the human to open that page and confirm
+   that the five templates (Bug report, Feature request, Developer, Documentation
+   suggestion, Release) are offered, and record the answer in a comment on the issue.
 4. `CHANGELOG.md`: no entry needed (no change for users of the package); the PR is
    labelled `no changelog`.
 
@@ -83,6 +69,5 @@ CTBase.jl follows Part II too: its templates become the organization's.
 
 ## Stop and report when
 
-- the `.github` repository is private, or Part I is not merged;
 - a label of the reference set is missing in the package;
 - the package has a template of its own that the organization does not provide.
