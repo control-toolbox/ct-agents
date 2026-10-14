@@ -24,6 +24,9 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
   are, even where they say "Handbook".
 - No source change. If a step would touch code (see the end of step 4), stop and report.
 - Always link the PR to the existing issues and comment on them (step 0 and step 7).
+- **Narrate the work on the PR** (see "Narrating the work"): the PR comments are the
+  record from which the work is reviewed afterwards. A claim in a comment that the diff
+  does not show is a defect.
 
 ## Steps
 
@@ -158,9 +161,10 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
    ct-conventions), and the docs build in draft mode if `docs/make.jl` was touched.
 
-7. **PR and issues.** Commit in small commits, push, and open the PR against `main`. One
-   line per paragraph in the body (GitHub renders line breaks), ending with the generation
-   note. In the body, link the issue of step 0:
+7. **PR and issues.** Commit in small commits and push. The PR is open as a Draft since
+   step 2 (see "Narrating the work"); mark it ready for review after the final comment.
+   Its body has one line per paragraph (GitHub renders line breaks), ends with the
+   generation note, and links the issue of step 0:
 
    - `Refs #N` for the "Harmonize" issue — **not** `Closes`, unless this PR covers every
      item of its scope (labels, templates, PR template, submodule, guidance files, typo
@@ -192,6 +196,34 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
    git worktree prune
    git branch -D chore/pin-ct-conventions
    ```
+
+## Narrating the work
+
+The work is reviewed afterwards by reading the PR comments and then checking them against
+the diff. So the agent explains what it does as it goes, in English, as comments on the
+PR (not in the description, which stays short).
+
+1. **Open the PR as a Draft right after the first commit** (end of step 2), with the body
+   described in step 7, and push after each following step.
+2. **Post one comment per step**, right after finishing it:
+
+   ```markdown
+   **Step <N> — <title>.**
+   Done: <what was changed, in one or two sentences>.
+   Files: <list of files touched>.
+   Decisions: <each choice that was not dictated by the recipe, and why>.
+   Left as is: <anything found and not changed, with file:line and the reason>.
+   Check: `<command>` → <actual result>.
+   ```
+
+3. **Step 4 in detail.** List every reference found by the `grep`, grouped by file, as
+   `old → new (rule)`, and every one left as is with the reason. The reviewer must be able
+   to tell that none was missed.
+4. **Final comment, before marking the PR ready:** a summary with the checklist of the
+   recipe steps (done / not applicable / stopped), the output of the step 6 checks pasted
+   as is, the issues linked and commented, and the open questions for the human.
+5. Never describe a check that was not run. If a check could not run (no `meta` suite, no
+   Julia available), say so.
 
 ## `AGENTS.md` template
 
