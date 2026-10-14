@@ -4,10 +4,18 @@ Part of [`harmonize.md`](harmonize.md): read its ground rules, protocol (issues,
 linking) and narration first. This file only holds what is specific to theme 1.
 
 Align one control-toolbox package on [ct-conventions](https://github.com/control-toolbox/ct-conventions):
-a pinned `.conventions/` submodule, an `AGENTS.md` that cites rule identifiers, a
-`CLAUDE.md` that only redirects. Mechanical and checkable.
+a tag pinned in `AGENTS.md` and read from a git-ignored clone in `.conventions/`, an
+`AGENTS.md` that cites rule identifiers, a `CLAUDE.md` that only redirects. Mechanical
+and checkable.
 
-Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull/595).
+**Never a git submodule.** On Julia 1.10, `Pkg.add` fails on a package whose tree contains
+a submodule (`GitError: cannot get submodules without a working tree`), and so does the
+registry's AutoMerge: it blocked the registration of CTBase v0.30.9
+(JuliaRegistries/General#171784, fixed in CTBase.jl#601).
+
+Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull/595),
+then [CTBase.jl#601](https://github.com/control-toolbox/CTBase.jl/pull/601), which
+replaced its submodule by the clone.
 
 ## Inputs
 
@@ -16,14 +24,19 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
 
 ## Steps
 
-1. **Submodule.** In the worktree (protocol step B):
+1. **Local clone, git-ignored.** In the worktree (protocol step B):
 
    ```bash
-   # only if the package has a .handbook submodule:
-   git submodule deinit -f .handbook && git rm -f .handbook && rm -rf .git/modules/.handbook
-   git submodule add https://github.com/control-toolbox/ct-conventions.git .conventions
-   git -C .conventions checkout "$TAG"
+   # only if the package has a submodule (.handbook or .conventions):
+   for f in .handbook .conventions .gitmodules; do git rm -rfq --ignore-unmatch "$f"; done
+   rm -rf .handbook .conventions
+   printf '\n# ct-conventions, cloned at the tag pinned in AGENTS.md\n.conventions/\n' >> .gitignore
+   git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" \
+     https://github.com/control-toolbox/ct-conventions.git .conventions
    ```
+
+   `.gitmodules` must not exist afterwards, unless it lists another submodule: then stop
+   and report.
 
 2. **`AGENTS.md`.** Rewrite it from the template below. Keep any section that is specific
    to this package (its own layout, commands, pitfalls) after `Key Conventions`. If a
@@ -93,7 +106,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    | "safe common denominator" | the migration note of `rules/dimension.md` (no identifier) |
    | "hot path vs. setup path", `performance.md` workflow | `PERF1` |
    | "Docstrings deferred (Handbook convention)" | "docstrings last" (`plan-template.md`) |
-   | `.handbook` bump instructions in `CONTRIBUTING.md` | `git -C .conventions fetch --tags && git -C .conventions checkout <tag>` |
+   | `.handbook` bump instructions in `CONTRIBUTING.md` | the `Developer Resources` text of step 5 |
 
    For any other occurrence, find the matching rule with the correspondence table of
    [`BREAKING.md`](https://github.com/control-toolbox/ct-conventions/blob/main/BREAKING.md)
@@ -114,7 +127,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    it. Never invent an explanation.
 
 5. **`CONTRIBUTING.md`.** The contributor guide must say how to get and bump the
-   submodule. If it has no `## Developer Resources` section, add this one at the end,
+   conventions. If it has no `## Developer Resources` section, add this one at the end,
    after a `---` separator (copy it from CTBase.jl); if it has one, make sure it contains
    this text and replace any older text about the Handbook:
 
@@ -123,34 +136,44 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
 
    ## Developer Resources
 
-   The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is a git submodule in `.conventions/`, pinned to a SemVer release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` in an existing clone.
+   The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is pinned to a SemVer release tag in `AGENTS.md` ("Pinned version"). Read it from a local clone in `.conventions/`, which git ignores; `AGENTS.md` gives the clone command.
 
-   To bump it, run `git -C .conventions fetch --tags && git -C .conventions checkout <tag>`, then commit the updated pointer.
+   It is not a git submodule: `Pkg.add` on Julia 1.10 fails on a package whose tree contains one (`cannot get submodules without a working tree`). To bump it, change the tag in `AGENTS.md` (the "Pinned version" line and the clone command), then re-clone.
    ```
 
    The `README.md` is generated from `CONTRIBUTING.md` by the UpdateReadme workflow: do
    not edit `README.md` by hand.
 
-6. **`_typos.toml`.** The submodule must not be spell-checked. In the `extend-exclude`
+6. **`_typos.toml`.** The local clone must not be spell-checked. In the `extend-exclude`
    list of `[files]`, add `".conventions/",` (CTBase.jl has it). If the file or the list
    does not exist, create it with that entry only, and say so in the comment. Do not touch
    the other entries.
 
 7. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
-   ct-conventions pinned in `.conventions/` at `$TAG`, `AGENTS.md` cites rules by
+   ct-conventions pinned at `$TAG` in `AGENTS.md`, `AGENTS.md` cites rules by
    identifier, references updated. Keep the `✅ Compatibility` footer ("No breaking
    changes").
 
 8. **Check.** Paste each command's output as is:
 
    ```bash
-   git submodule status                                    # .conventions at $TAG
+   git ls-files -s | grep -c '^160000'                     # 0: no submodule in the tree
+   git check-ignore -q .conventions && echo ignored         # ignored
+   git -C .conventions describe --tags                     # $TAG
    grep -c 'ct-conventions' CONTRIBUTING.md                # at least 1
    grep -n 'conventions' _typos.toml                       # the .conventions/ exclusion
    grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
    git diff --stat origin/main -- src ext                  # only comment lines, if any
    git diff origin/main -- src ext | grep '^[+-][^+-]' | grep -v '^[+-][[:space:]]*#' | wc -l   # 0
    git -C "$ROOT/$PKG" status --short | diff - "/tmp/$PKG-status-before.txt"   # no output
+   ```
+
+   Then check that Julia 1.10 can install the pushed branch (the registry's lowest
+   version), in an empty depot:
+
+   ```bash
+   d=$(mktemp -d); JULIA_DEPOT_PATH=$d julia +1.10 --project=$d -e \
+     'using Pkg; Pkg.add(url="https://github.com/'"$REPO"'", rev="chore/pin-ct-conventions"); println("OK")'
    ```
 
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
@@ -171,7 +194,7 @@ Quick-reference for any agent working on this repository.
 <keep the package's own layout; add the `.conventions/` line>
 
 ```text
-.conventions/  # ct-conventions (git submodule, pinned to a tag)
+.conventions/  # ct-conventions, cloned at the pinned tag (git-ignored)
 ```
 
 ---
@@ -179,9 +202,15 @@ Quick-reference for any agent working on this repository.
 ## Conventions
 
 The coding conventions live in
-[ct-conventions](https://github.com/control-toolbox/ct-conventions), vendored as a git
-submodule in `.conventions/` and pinned to a SemVer release tag (`vX.Y.Z`). Read the
-local files; if `.conventions/` is empty, run `git submodule update --init`.
+[ct-conventions](https://github.com/control-toolbox/ct-conventions), pinned below to a
+SemVer release tag (`vX.Y.Z`). Read them from a local clone in `.conventions/`
+(git-ignored, not a submodule). If it is missing, or `git -C .conventions describe --tags`
+is not the pinned tag, (re)create it:
+
+```bash
+rm -rf .conventions
+git -c advice.detachedHead=false clone --quiet --depth 1 --branch <TAG> https://github.com/control-toolbox/ct-conventions.git .conventions
+```
 
 **Pinned version: ct-conventions <TAG>.** Cite rules by identifier (`MOD3`, `TST1`), and
 state the version you applied in plans and reports.
@@ -227,9 +256,12 @@ How agents behave on these repositories is described in
 When a package already pins an older tag, the PR is small:
 
 ```bash
-git -C .conventions fetch --tags && git -C .conventions checkout "$TAG"
-sed -i '' "s/Pinned version: ct-conventions v[0-9.]*\./Pinned version: ct-conventions $TAG./" AGENTS.md
+sed -i '' -E "s/ct-conventions v[0-9]+\.[0-9]+\.[0-9]+\./ct-conventions $TAG./; s/--branch v[0-9]+\.[0-9]+\.[0-9]+/--branch $TAG/" AGENTS.md
+rm -rf .conventions && git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" \
+  https://github.com/control-toolbox/ct-conventions.git .conventions
 ```
+
+If the package still has a `.conventions` submodule, do step 1 first.
 
 Check the package against the rules the new release adds or tightens (its `CHANGELOG.md`
 entry), say the result in the PR body, and add a changelog line — or, if the previous pin
