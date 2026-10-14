@@ -1,35 +1,24 @@
-# Recipe: pin ct-conventions in a package
+# Recipe: pin ct-conventions in a package (theme 1)
+
+Part of [`harmonize.md`](harmonize.md): read its ground rules, protocol (issues, worktree,
+linking) and narration first. This file only holds what is specific to theme 1.
 
 Align one control-toolbox package on [ct-conventions](https://github.com/control-toolbox/ct-conventions):
 a pinned `.conventions/` submodule, an `AGENTS.md` that cites rule identifiers, a
-`CLAUDE.md` that only redirects. Mechanical and checkable: meant to be run by a simple
-agent, one package at a time, in local or remote mode.
+`CLAUDE.md` that only redirects. Mechanical and checkable.
 
 Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull/595).
 
 ## Inputs
 
-- `PKG` — the package directory (e.g. `CTModels.jl`).
-- `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
-
-## Ground rules
-
-- Work in a fresh worktree or clone from `main`; never on a feature branch of someone
-  else, never with uncommitted changes around.
-- Branch `chore/pin-ct-conventions`. Commits and PR title in English, `docs:` prefix.
-- Open a PR and stop. **Never merge**: the human merges.
-- Do not edit history: leave past entries of `CHANGELOG.md` and `BREAKING.md` as they
-  are, even where they say "Handbook".
-- No source change. If a step would touch `src/` or `ext/` code (not comments), stop and
-  report.
+`PKG`, `REPO`, and `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
+Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-conventions`.
 
 ## Steps
 
-1. **Submodule.**
+1. **Submodule.** In the worktree (protocol step B):
 
    ```bash
-   git checkout main && git pull
-   git checkout -b chore/pin-ct-conventions
    # only if the package has a .handbook submodule:
    git submodule deinit -f .handbook && git rm -f .handbook && rm -rf .git/modules/.handbook
    git submodule add https://github.com/control-toolbox/ct-conventions.git .conventions
@@ -51,51 +40,97 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
    @AGENTS.md
    ```
 
-4. **References to the Handbook.** Find them:
+4. **References to the Handbook.** Count them **before** changing anything, on the
+   unmodified code, and list them:
 
    ```bash
-   grep -rnI "Handbook\|\.handbook" . --exclude-dir=.git --exclude-dir=.conventions \
-     | grep -v "^./CHANGELOG.md\|^./BREAKING.md"
+   git grep -nIi handbook origin/main -- . ':!CHANGELOG.md' ':!BREAKING.md' | wc -l   # BEFORE
+   git grep -nIi handbook origin/main -- . ':!CHANGELOG.md' ':!BREAKING.md'           # the list
    ```
 
-   and replace each by its new form:
+   The count is above zero for every package (the `.handbook` and `Handbook` spellings
+   both match). If it is zero, the command is wrong or the package is already done: stop
+   and report. After the replacements, the same search on the working tree must find
+   nothing:
+
+   ```bash
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # AFTER
+   ```
+
+   Report both counts in the step 4 comment, and the list as `old → new (rule)`.
+
+   and replace each by its new form. Links to the old `philosophy/<file>.md` pages become
+   links to `rules/<new file>.md` of ct-conventions, with the identifier when the sentence
+   is about one rule:
+
+   | Old page | New page | Prefix |
+   | --- | --- | --- |
+   | `philosophy/modules.md` | `rules/modules.md` | `MOD` |
+   | `philosophy/types-traits-interfaces.md` | `rules/types.md` | `TYP` |
+   | `philosophy/dimension-and-shape.md` | `rules/dimension.md` | `DIM` |
+   | `philosophy/exceptions.md` | `rules/exceptions.md` | `EXC` |
+   | `philosophy/performance.md` | `rules/performance.md` | `PERF` |
+   | `philosophy/docstrings.md` | `rules/docstrings.md` | `DOC` |
+   | `philosophy/testing.md` | `rules/testing.md` | `TST` |
+   | `philosophy/documentation.md` | `rules/site.md` | `SITE` |
+   | `philosophy/changelog.md` | `rules/changelog.md` | `CHG` |
+
+   Frequent phrasings:
 
    | Found | Replace by |
    | --- | --- |
-   | `.handbook/` in `_typos.toml` or `.gitignore`-like lists | `.conventions/` |
+   | `.handbook/` in `_typos.toml` or similar lists | `.conventions/` |
    | link to the Handbook repository | link to `https://github.com/control-toolbox/ct-conventions` |
    | `WORKFLOWS.md` of the Handbook | `https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md` |
-   | `VITEPRESS-DOC.md`, "Plot image format" | `ct-conventions SITE12` |
-   | `documentation.md`, self-reference | `ct-conventions SITE5` |
-   | "Handbook tenet 2" / "using, never import" | `MOD3` |
-   | "Handbook: fake types never inside functions" | `TST3` |
-   | `philosophy/types-traits-interfaces.md#aliases-and-where` | `TYP3` |
+   | `VITEPRESS-DOC.md`, "Plot image format" | `SITE12` |
+   | `documentation.md`, self-reference | `SITE5` |
+   | "Handbook tenet 2", "using, never import", `modules.md` rule | `MOD3` |
+   | "fake types never inside functions", "recording fakes at module top level" | `TST3` |
+   | "capability-gated test" contract or policy | `TST6` |
+   | "alias/where bounds", `types-traits-interfaces.md#aliases-and-where` | `TYP3` |
+   | "1-D = scalar", `dimension-and-shape.md` | `DIM1` |
+   | "in-place buffer stays a vector" | `DIM2` |
+   | "safe common denominator" | the migration note of `rules/dimension.md` (no identifier) |
+   | "hot path vs. setup path", `performance.md` workflow | `PERF1` |
+   | "Docstrings deferred (Handbook convention)" | "docstrings last" (`plan-template.md`) |
    | `.handbook` bump instructions in `CONTRIBUTING.md` | `git -C .conventions fetch --tags && git -C .conventions checkout <tag>` |
 
    For any other occurrence, find the matching rule with the correspondence table of
    [`BREAKING.md`](https://github.com/control-toolbox/ct-conventions/blob/main/BREAKING.md)
    in ct-conventions. If none fits, leave the line and report it.
 
+   What may be edited: Markdown, comments and docstrings, `@testset` names, and strings
+   printed by probe scripts (report the latter). Anything else is code: stop and report.
+
+   **A reference that states a fact about the code is not evidence of that fact.** Some
+   references are not citations but claims ("Docstrings deferred (Handbook convention)",
+   "not yet implemented", "see the Handbook, this is a known deviation"). Check the claim
+   against the code before copying it into a new citation, and say how you checked in the
+   step 4 comment. Example: five files of CTModels carried "Docstrings deferred" while
+   every symbol had a docstring (`Base.Docs.meta(CTModels.PlotCase)`; the comment was
+   written in the same commit as the docstrings). If the claim is false, remove the
+   comment; if it is true, keep it, cite the rule, and list it in the final comment as a
+   standing deviation for the human to decide on; if you cannot tell, leave it and report
+   it. Never invent an explanation.
+
 5. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
    ct-conventions pinned in `.conventions/` at `$TAG`, `AGENTS.md` cites rules by
    identifier, references updated. Keep the `✅ Compatibility` footer ("No breaking
    changes").
 
-6. **Check.**
+6. **Check.** Paste each command's output as is:
 
    ```bash
-   git submodule status                      # .conventions at $TAG
-   grep -rnI "\.handbook" . --exclude-dir=.git --exclude-dir=.conventions \
-     | grep -v "^./CHANGELOG.md\|^./BREAKING.md"     # nothing
-   git diff --stat main -- src ext            # no code change (comments only, if any)
+   git submodule status                                    # .conventions at $TAG
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
+   git diff --stat origin/main -- src ext                  # only comment lines, if any
+   git diff origin/main -- src ext | grep '^[+-][^+-]' | grep -v '^[+-][[:space:]]*#' | wc -l   # 0
+   git -C "$ROOT/$PKG" status --short | diff - "/tmp/$PKG-status-before.txt"   # no output
    ```
 
    Then run the package's `test/suite/meta` if it exists (see `method.md` §1 of
-   ct-conventions), and the docs build in draft mode if `docs/make.jl` was touched.
-
-7. **PR.** Commit, push, open the PR against `main`, one line per paragraph in the body
-   (GitHub renders line breaks), ending with the generation note. Report: the files
-   changed, anything left as is and why, and the check results. Do not merge.
+   ct-conventions), and the docs build in draft mode if `docs/make.jl` or a guide was
+   touched.
 
 ## `AGENTS.md` template
 
@@ -156,8 +191,8 @@ How agents behave on these repositories is described in
 
 ## Stop and report when
 
-- the package is not on `main`, or has uncommitted changes;
 - `AGENTS.md` has a package-specific section that contradicts a rule;
 - a Handbook reference has no matching rule in the correspondence table;
 - a step would change code, not comments;
-- the checks of step 6 fail.
+- the checks of step 6 fail;
+- and in the cases listed in `harmonize.md`.
