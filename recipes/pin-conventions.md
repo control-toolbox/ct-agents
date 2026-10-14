@@ -58,23 +58,48 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
      | grep -v "^./CHANGELOG.md\|^./BREAKING.md"
    ```
 
-   and replace each by its new form:
+   and replace each by its new form. Links to the old `philosophy/<file>.md` pages become
+   links to `rules/<new file>.md` of ct-conventions, with the identifier when the sentence
+   is about one rule:
+
+   | Old page | New page | Prefix |
+   | --- | --- | --- |
+   | `philosophy/modules.md` | `rules/modules.md` | `MOD` |
+   | `philosophy/types-traits-interfaces.md` | `rules/types.md` | `TYP` |
+   | `philosophy/dimension-and-shape.md` | `rules/dimension.md` | `DIM` |
+   | `philosophy/exceptions.md` | `rules/exceptions.md` | `EXC` |
+   | `philosophy/performance.md` | `rules/performance.md` | `PERF` |
+   | `philosophy/docstrings.md` | `rules/docstrings.md` | `DOC` |
+   | `philosophy/testing.md` | `rules/testing.md` | `TST` |
+   | `philosophy/documentation.md` | `rules/site.md` | `SITE` |
+   | `philosophy/changelog.md` | `rules/changelog.md` | `CHG` |
+
+   Frequent phrasings:
 
    | Found | Replace by |
    | --- | --- |
-   | `.handbook/` in `_typos.toml` or `.gitignore`-like lists | `.conventions/` |
+   | `.handbook/` in `_typos.toml` or similar lists | `.conventions/` |
    | link to the Handbook repository | link to `https://github.com/control-toolbox/ct-conventions` |
    | `WORKFLOWS.md` of the Handbook | `https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md` |
-   | `VITEPRESS-DOC.md`, "Plot image format" | `ct-conventions SITE12` |
-   | `documentation.md`, self-reference | `ct-conventions SITE5` |
-   | "Handbook tenet 2" / "using, never import" | `MOD3` |
-   | "Handbook: fake types never inside functions" | `TST3` |
-   | `philosophy/types-traits-interfaces.md#aliases-and-where` | `TYP3` |
+   | `VITEPRESS-DOC.md`, "Plot image format" | `SITE12` |
+   | `documentation.md`, self-reference | `SITE5` |
+   | "Handbook tenet 2", "using, never import", `modules.md` rule | `MOD3` |
+   | "fake types never inside functions", "recording fakes at module top level" | `TST3` |
+   | "capability-gated test" contract or policy | `TST6` |
+   | "alias/where bounds", `types-traits-interfaces.md#aliases-and-where` | `TYP3` |
+   | "1-D = scalar", `dimension-and-shape.md` | `DIM1` |
+   | "in-place buffer stays a vector" | `DIM2` |
+   | "safe common denominator" | the migration note of `rules/dimension.md` (no identifier) |
+   | "hot path vs. setup path", `performance.md` workflow | `PERF1` |
+   | "Docstrings deferred (Handbook convention)" | "docstrings last" (`plan-template.md`) |
    | `.handbook` bump instructions in `CONTRIBUTING.md` | `git -C .conventions fetch --tags && git -C .conventions checkout <tag>` |
 
    For any other occurrence, find the matching rule with the correspondence table of
    [`BREAKING.md`](https://github.com/control-toolbox/ct-conventions/blob/main/BREAKING.md)
    in ct-conventions. If none fits, leave the line and report it.
+
+   What may be edited: Markdown, comments and docstrings, `@testset` names, and strings
+   printed by probe scripts (report the latter). Anything else is code: stop and report.
 
 5. **`CHANGELOG.md`.** Under `[Unreleased]`, in `### 📚 Documentation`, add one entry:
    ct-conventions pinned in `.conventions/` at `$TAG`, `AGENTS.md` cites rules by
