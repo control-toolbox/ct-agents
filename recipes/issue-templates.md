@@ -29,8 +29,10 @@ The organization's templates live in
 [`control-toolbox/.github/.github/`](https://github.com/control-toolbox/.github/tree/main/.github)
 (control-toolbox/.github#1, #2). They come from CTBase.jl, the reference chosen by the
 maintainer, made generic: a `Package` dropdown instead of CTBase's areas, only the
-organization's Discussions link in `config.yml`, "Prepare a release", no assignee. A change
-to a template is made there, once, for every package.
+organization's Discussions link in `config.yml`, "Prepare a release", no assignee. The organization also
+holds `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0, control-toolbox/.github#3), identical to
+the copies some packages carry. A change to a template is made there, once, for every
+package.
 
 ## Part II — per package, after Part I is merged and theme 2 is done
 
@@ -40,6 +42,7 @@ to a template is made there, once, for every package.
    ```bash
    git rm -r .github/ISSUE_TEMPLATE
    git rm -f .github/pull_request_template.md   # if it exists
+   git rm -f CODE_OF_CONDUCT.md                 # if it exists
    ```
 
    A "blank issue" template (`blank-issue.md`, "Blank template for general issue") is
@@ -57,7 +60,7 @@ to a template is made there, once, for every package.
    gh api "repos/$REPO/community/profile" --jq .files.pull_request_template.html_url
    ```
 
-   must point to `control-toolbox/.github`. The issue templates have no API and the
+   must point to `control-toolbox/.github`; the same holds for `.files.code_of_conduct_file`. The issue templates have no API and the
    page `https://github.com/$REPO/issues/new/choose` redirects to the login page without
    a session, so `curl` cannot check them: ask the human to open that page and confirm
    that the five templates (Bug report, Feature request, Developer, Documentation

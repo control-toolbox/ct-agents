@@ -11,7 +11,7 @@ Model to copy: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.jl/pull
 
 ## Inputs
 
-`PKG`, `REPO`, and `TAG` — the ct-conventions tag to pin (e.g. `v0.2.0`).
+`PKG`, `REPO`, and `TAG` — the ct-conventions tag to pin (the latest release: `gh release view -R control-toolbox/ct-conventions --json tagName --jq .tagName`).
 Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-conventions`.
 
 ## Steps
@@ -221,3 +221,17 @@ How agents behave on these repositories is described in
 - a step would change code, not comments;
 - the checks of step 8 fail;
 - and in the cases listed in `harmonize.md`.
+
+## Bumping an existing pin
+
+When a package already pins an older tag, the PR is small:
+
+```bash
+git -C .conventions fetch --tags && git -C .conventions checkout "$TAG"
+sed -i '' "s/Pinned version: ct-conventions v[0-9.]*\./Pinned version: ct-conventions $TAG./" AGENTS.md
+```
+
+Check the package against the rules the new release adds or tightens (its `CHANGELOG.md`
+entry), say the result in the PR body, and add a changelog line — or, if the previous pin
+is still under `[Unreleased]`, change its version instead.
+
