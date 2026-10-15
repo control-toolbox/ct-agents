@@ -32,8 +32,11 @@ Paste the output in the first comment of the PR (or in the comment on the issue)
 | --- | --- | --- |
 | `.JuliaFormatter.toml` | `style = "blue"` | add it if missing; if it names another style, **stop and report** |
 | `_typos.toml` | excludes `.conventions/` (theme 1) | nothing else: the word lists are package-specific |
-| `.markdownlint.json` | same as CTBase | if it differs or is missing, report; do not change it |
+| `.markdownlint.json` | exactly the content of [`GEN2`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/general.md) (ct-conventions ≥ v0.4.0) | replace or create it; remove every `<!-- markdownlint-disable … -->` comment from the tracked `.md` files and list them |
 | `formatter.lock` | — | nothing: the Formatter workflow writes it |
+
+Do not fix what markdownlint reports with the new configuration: that is not part of
+the theme. Count it in the survey comment (`npx markdownlint-cli2@0.18.1 $(git ls-files '*.md')`).
 
 Why `.JuliaFormatter.toml`: the nightly Formatter workflow (CTActions `formatter.yml`) runs
 `format(".", BlueStyle())`, with the style hard-coded. A local `format(".")` or the VS Code

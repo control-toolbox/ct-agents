@@ -111,9 +111,9 @@ and edited by the following ones:
 Harmonization progress (recipes: https://github.com/control-toolbox/ct-agents/tree/main/recipes)
 - [x] 1. Pin ct-conventions — <PR URL>
 - [ ] 2. Labels
-- [ ] 3. Issue and PR templates
-- [ ] 4. Typo and lint configuration — not specified yet
-- [ ] 5. Obsolete automation — not specified yet
+- [ ] 3. Issue and PR templates, code of conduct
+- [ ] 4. Typo and lint configuration
+- [ ] 5. Obsolete automation
 ```
 
 Tick a theme when its PR is **merged**, not when it is opened. Also comment on each
