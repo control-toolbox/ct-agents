@@ -55,7 +55,7 @@ Model for a package: [CTBase.jl#595](https://github.com/control-toolbox/CTBase.j
 
 ### A. Find the issues about this work
 
-Known on 2026-10-14 (search again, the list may have changed):
+Known on 2026-10-16 (search again, the list may have changed):
 
 | Package | "Harmonize" issue |
 | --- | --- |
@@ -64,7 +64,7 @@ Known on 2026-10-14 (search again, the list may have changed):
 | CTFlows.jl | control-toolbox/CTFlows.jl#460 |
 | CTDirect.jl | control-toolbox/CTDirect.jl#642 |
 | CTParser.jl | control-toolbox/CTParser.jl#358 |
-| CTLie | control-toolbox/CTLie#48 |
+| CTLie | control-toolbox/CTLie.jl#48 |
 | OptimalControl | control-toolbox/OptimalControl.jl#982 |
 
 Also list the related open issues, without closing them: an "Enforce Handbook tenet 2:
@@ -75,6 +75,17 @@ Also list the related open issues, without closing them: an "Enforce Handbook te
 gh issue list -R "$REPO" --state open --limit 100 \
   --search "Handbook OR AGENTS.md OR conventions OR submodule OR labels OR templates" \
   --json number,title,assignees --jq '.[]|"#\(.number) \(.title) [\([.assignees[].login]|join(","))]"'
+```
+
+**Check the description of the "Harmonize" issue.** It must be the text of
+[`harmonize-issue.md`](harmonize-issue.md) (themes 1–5, links to the recipes, no
+submodule). If it is an older text (it asks to "vendor the Handbook as a git submodule"),
+replace it, and say so in the tracking comment:
+
+Copy the template block to `/tmp/body.md`, replace `<PKG>` and `$REPO`, then:
+
+```bash
+gh issue edit <N> -R "$REPO" --title "[Chore] Harmonize repository metadata and ct-conventions integration with CTBase" --body-file /tmp/body.md
 ```
 
 Read each one. Do not start if the package already has an open PR for the same theme
