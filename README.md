@@ -44,7 +44,7 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`base.md`](base.md) | Behavior shared by every agent, whatever the harness: reading the conventions, git, editing, asking vs proceeding |
 | [`adapters/claude-code.md`](adapters/claude-code.md) | Claude Code specifics: background test runs with `Monitor` |
 | [`setup/github-pat.md`](setup/github-pat.md) | GitHub MCP server and fine-grained personal access tokens |
-| [`recipes/harmonize.md`](recipes/harmonize.md) | Harmonizing the repositories of the ecosystem: shared protocol (issues, worktree, PR narration) and the themes — [`pin-conventions.md`](recipes/pin-conventions.md), [`labels.md`](recipes/labels.md), [`issue-templates.md`](recipes/issue-templates.md), [`lint-and-automation.md`](recipes/lint-and-automation.md) |
+| [`recipes/harmonize.md`](recipes/harmonize.md) | Harmonizing the repositories of the ecosystem: shared protocol (issues, worktree, PR narration), the [issue description](recipes/harmonize-issue.md), and the themes — [`pin-conventions.md`](recipes/pin-conventions.md), [`labels.md`](recipes/labels.md), [`issue-templates.md`](recipes/issue-templates.md), [`lint-and-automation.md`](recipes/lint-and-automation.md) |
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
 
 ## Layout

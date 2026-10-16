@@ -48,7 +48,9 @@ formatter reads the file; without it they use the default style and disagree wit
 | --- | --- |
 | `.github/workflows/AIHello.yml` | remove it (removed from CTBase in `5a82a55b`) |
 | a workflow only in the package | **report**, do not remove: it may be package-specific (GPU runners, benchmarks) |
-| a workflow only in CTBase | report |
+| `AddToProject.yml` missing | add it, copied from CTBase (it reads the organization secret `PROJECT_TOKEN`) |
+| a CI job removed while its `run ci …` label is still used (the kkt GPU job, removed by mistake in CTSolvers and CTLie) | restore it from the commit before its removal, in a separate PR; say which commit removed it |
+| another workflow only in CTBase | report |
 | differences inside a shared workflow | ignore names, comments and whitespace; report any other difference, do not align it |
 
 ## PR
