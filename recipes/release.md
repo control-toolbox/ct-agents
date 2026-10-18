@@ -5,7 +5,7 @@ release" to the closed tracking issue. What a correct release is — its number,
 its registration — is in
 [`rules/release.md`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/release.md)
 of ct-conventions (`REL1`–`REL6`), and how the two registries work is in
-[`ct-registry/RELEASING.md`](https://github.com/control-toolbox/ct-registry/blob/main/RELEASING.md).
+[`ct-registry/RELEASING.md`](https://github.com/control-toolbox/ct-registry/blob/HEAD/RELEASING.md).
 This file says who does what, in which order. The texts the agent posts are in
 [`release-issue.md`](release-issue.md).
 
