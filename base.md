@@ -22,6 +22,12 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 - **The human merges.** An agent never merges a pull request, in either mode. In remote
   mode, the agent works on a dedicated branch of a draft PR and the orchestration pushes;
   the human review of that PR is the approval.
+
+  **One exception: the release PR in `autonomous` mode** of
+  [`recipes/release.md`](recipes/release.md). The agent may merge it only when the human
+  chose that mode for this release, and only when every condition holds: the diff touches
+  `Project.toml`, `CHANGELOG.md` and `BREAKING.md` only; every check passed or was
+  skipped; `main` has not moved since the PR was opened. Otherwise the human merges.
 - Commit regularly, in small commits. Do not commit on the default branch: branch off
   the correct base.
 - Prefer the `gh` CLI for GitHub operations (PRs, issues).

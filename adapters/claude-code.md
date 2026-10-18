@@ -25,6 +25,27 @@ Not a default — for a short suite (well under a minute), just running and wait
 simpler and the extra setup isn't worth it. Reach for it when a run is expected to
 take minutes, so a failure doesn't sit unnoticed and idle time isn't wasted.
 
+## Waiting for pull request checks
+
+A release ([`recipes/release.md`](../recipes/release.md)) waits for things that take
+minutes to hours: the checks of a PR, the bot's answer, the merge of a General PR. Do not
+block the session, and do not poll by hand:
+
+1. Launch the wait via `Bash` with `run_in_background: true`; its exit is the notification.
+
+   ```bash
+   gh pr checks "$PR" -R "$REPO" --watch --fail-fast --interval 60
+   # a state outside GitHub checks: an until-loop, with a ceiling
+   for i in $(seq 1 48); do
+     [ "$(gh pr view "$N" -R JuliaRegistries/General --json state --jq .state)" = MERGED ] && exit 0
+     sleep 300
+   done; exit 1
+   ```
+
+2. Keep working meanwhile, or tell the human what is awaited.
+3. On the notification, read the result again (`gh pr checks --json`, `gh pr view`)
+   rather than trusting the last line of the background output.
+
 ## Interactive flags
 
 Interactive git flags (`-i`, e.g. `git rebase -i`) are not supported.

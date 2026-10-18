@@ -220,7 +220,7 @@ Read in this order:
 | File | Content |
 | --- | --- |
 | [`rules/general.md`](.conventions/rules/general.md) | Rules that hold everywhere — **always read** |
-| [`README.md`](.conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`) |
+| [`README.md`](.conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`, `REL`) |
 | [`method.md`](.conventions/method.md) | How to work: tests, coverage, docs build, output capture |
 | [`plan-template.md`](.conventions/plan-template.md) | Template for a substantial piece of work |
 
@@ -240,7 +240,17 @@ How agents behave on these repositories is described in
 - **1-D is a scalar** — a one-dimensional state/control/variable is a `Number` (`DIM1`).
 - **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
 - **Docstrings last** — written once the implementation is stable (`DOC1`–`DOC8`).
-- **The human merges** — an agent never merges a pull request.
+- **The human merges** — an agent never merges a pull request, except a release PR in `autonomous` mode (see below).
+
+---
+
+## Recurring tasks
+
+- **Release.** When asked, in any language, to prepare a release, follow
+  [`recipes/release.md`](https://github.com/control-toolbox/ct-agents/blob/main/recipes/release.md)
+  of ct-agents (rules `REL1`–`REL6`). Read it with
+  `gh api repos/control-toolbox/ct-agents/contents/recipes/release.md -H "Accept: application/vnd.github.raw"`.
+  Stable or beta is the human's choice: if the request does not say, ask; never infer it.
 ````
 
 ## Stop and report when
@@ -267,3 +277,8 @@ Check the package against the rules the new release adds or tightens (its `CHANG
 entry), say the result in the PR body, and add a changelog line — or, if the previous pin
 is still under `[Unreleased]`, change its version instead.
 
+From ct-conventions v0.7.0 on, the bump also brings `AGENTS.md` to the template above: the
+`REL` prefix in the index, the merge exception in `Key Conventions`, and the `Recurring
+tasks` section; and it adds the `Registrable.yml` caller of
+[CTActions](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/registrable.md)
+(`REL4`), copied from CTBase.jl.
