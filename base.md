@@ -23,19 +23,12 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
   mode, the agent works on a dedicated branch of a draft PR and the orchestration pushes;
   the human review of that PR is the approval.
 
-  **One exception: the release PR in `autonomous` mode** of
-  [`recipes/release.md`](recipes/release.md). The agent may merge it only when the human
-  chose that mode for this release, and only when every condition holds: the diff touches
-  `Project.toml`, `CHANGELOG.md` and `BREAKING.md` only; every check passed or was
-  skipped; `main` has not moved since the PR was opened. Otherwise the human merges.
-- Commit regularly, in small commits. Do not commit on the default branch: branch off
-  the correct base.
-- Prefer the `gh` CLI for GitHub operations (PRs, issues).
-- End commit messages with the required `Co-Authored-By` trailer; end PR bodies with
-  the required generation note.
-- Do not commit transient files (`/tmp/*.log`, doc-build artifacts).
-- Commits, branches, issues and PRs are in English
-  ([`GEN1`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/general.md#gen1--english-everywhere)).
+  **One exception: auto-merge on a release PR in `autonomous` mode** of
+  [`recipes/release.md`](recipes/release.md). When the human chose that mode for this
+  release, the agent may enable GitHub's auto-merge on the release PR. It never merges
+  itself: GitHub does, once the required checks of `main` pass (the release gate, the
+  breakage report, the CI) and the branch is up to date. Without those protections, the
+  mode is not offered and the human merges.
 
 ## Editing files
 

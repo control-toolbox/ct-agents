@@ -17,9 +17,8 @@ Every comment on the tracking issue ends with one line, invisible on GitHub:
 <!-- ct-release phase=<0-8> kind=<stable|beta> version=<X.Y.Z[-beta]> mode=<supervised|autonomous> pr=<N|-> merge=<sha|-> state=<done|stopped|waiting> -->
 ```
 
-A session that resumes a release reads the last marker of the issue
-(`gh issue view <N> --json comments --jq '.comments[-1].body'`), and starts the phase after
-`phase` when `state=done`, or the same phase when `stopped` or `waiting`.
+The marker is for the reader. A session that resumes a release does not trust it: it runs
+`release.jl status`, which recomputes the phase from the facts.
 
 ## Proposal
 
@@ -43,12 +42,14 @@ posted as the first comment of the tracking issue once validated.
 ### What the agent will do
 
 1. Open the tracking issue `[RELEASE] v<VERSION>`, and comment on it at every phase.
-2. Open the PR `release/v<VERSION>`: `Project.toml`, `CHANGELOG.md`, `BREAKING.md`; labels <run labels>, `documentation push preview`.
-3. Wait for the checks, and summarize them on the issue.
-4. <autonomous: merge the PR if every check passes and the diff is those three files | supervised: wait for you to merge it>.
-5. Tag `v<VERSION>` and create the GitHub release, notes generated since `<PREV>`.
+2. Open the PR `release/v<VERSION>` (`Project.toml`, `CHANGELOG.md`, `BREAKING.md`) after the release gate passed locally; labels <run labels, GPU: kkt or occidata>, `documentation push preview`.
+3. <autonomous: enable auto-merge: GitHub merges when the required checks pass (gate, breakage report, CI) | supervised: wait for you to merge it>.
+4. Summarize the checks on the issue.
+5. Wait for the `ReleaseTag` workflow: tag `v<VERSION>` and GitHub release, notes since `<PREV>`.
 6. <stable: post the registration comment, once (<supervised: after your go>), and follow the General PR to its merge | beta: register in ct-registry with LocalRegistry>.
 7. Close the issue with a final comment.
+
+Every step starts from `release.jl status`: if anything interrupts the release, it is resumed from where the facts say it is.
 
 ### What you will do
 
@@ -56,7 +57,7 @@ posted as the first comment of the tracking issue once validated.
 - <jump: comment `[merge approved]` on the General PR, or let the agent do it>
 - <anything else: none>
 
-**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails)?
+**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails; <available: the repository has auto-merge and the required checks | not available: <why>>)?
 ````
 
 ## Issue description
@@ -116,11 +117,12 @@ Phase 7, stable only, **posted once**. The mention is built by `printf`, so that
 nowhere before this command runs:
 
 ```bash
+gh release view "v$VERSION" -R "$REPO" --json body --jq .body > whats-changed.md
 {
   printf '%s%s register\n\nRelease notes:\n\n' '@' 'JuliaRegistrator'
   cat release-notes.md      # the CHANGELOG section of VERSION, links made absolute at the tag
   echo
-  cat whats-changed.md      # the notes of the GitHub release (phase 6)
+  cat whats-changed.md      # the notes of the GitHub release, made by ReleaseTag
 } > registration.md
 gh issue comment "$ISSUE" -R "$REPO" --body-file registration.md
 ```

@@ -47,7 +47,7 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`setup/github-pat.md`](setup/github-pat.md) | GitHub MCP server and fine-grained personal access tokens |
 | [`recipes/harmonize.md`](recipes/harmonize.md) | Harmonizing the repositories of the ecosystem: shared protocol (issues, worktree, PR narration), the [issue description](recipes/harmonize-issue.md), and the themes — [`pin-conventions.md`](recipes/pin-conventions.md), [`labels.md`](recipes/labels.md), [`issue-templates.md`](recipes/issue-templates.md), [`lint-and-automation.md`](recipes/lint-and-automation.md) |
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
-| [`recipes/release.md`](recipes/release.md) | Releasing a package, stable or beta: proposal, tracking issue, release PR, checks, merge, tag, registration; `supervised` and `autonomous` modes. Texts: [`release-issue.md`](recipes/release-issue.md) |
+| [`recipes/release.md`](recipes/release.md) | Releasing a package, stable or beta, on top of CTActions' release tool (`status`, `gate`) and required checks: proposal, tracking issue, release PR, auto-merge, tag, registration; `supervised` and `autonomous` modes. Texts: [`release-issue.md`](recipes/release-issue.md) |
 
 ## Layout
 

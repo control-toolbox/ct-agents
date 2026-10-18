@@ -248,7 +248,7 @@ How agents behave on these repositories is described in
 
 - **Release.** When asked, in any language, to prepare a release, follow
   [`recipes/release.md`](https://github.com/control-toolbox/ct-agents/blob/main/recipes/release.md)
-  of ct-agents (rules `REL1`–`REL6`). Read it with
+  of ct-agents (rules `REL1`–`REL7`). Read it with
   `gh api repos/control-toolbox/ct-agents/contents/recipes/release.md -H "Accept: application/vnd.github.raw"`.
   Stable or beta is the human's choice: if the request does not say, ask; never infer it.
 ````
@@ -279,6 +279,7 @@ is still under `[Unreleased]`, change its version instead.
 
 From ct-conventions v0.7.0 on, the bump also brings `AGENTS.md` to the template above: the
 `REL` prefix in the index, the merge exception in `Key Conventions`, and the `Recurring
-tasks` section; and it adds the `Registrable.yml` caller of
-[CTActions](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/registrable.md)
-(`REL4`), copied from CTBase.jl.
+tasks` section; and it adds the release callers of
+[CTActions](https://github.com/control-toolbox/CTActions/blob/main/docs/README.md),
+`ReleaseGate.yml` and `ReleaseTag.yml`, and moves `Breakage.yml` to `breakage-suite.yml`,
+copied from CTBase.jl.
