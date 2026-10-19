@@ -285,7 +285,17 @@ $TOOL register --repo "$REPO" --version "$VERSION" --post   # once
 ```
 
 `register` refuses unless `status` says phase 7, todo, so it never posts twice; it checks
-afterwards that the issue holds one mention. Never post the comment by hand. Then `status`
+afterwards that there is one mention. Never post the comment by hand.
+
+**`main` moved past the merge commit** (another PR was merged before the registration):
+asked on the issue, the bot would register the head of `main`, not the tagged commit.
+`status` says so. In **both modes**, ask the human; with the go, post the comment on the
+merge commit itself, which the bot registers:
+
+```bash
+$TOOL register --repo "$REPO" --version "$VERSION" --on-commit          # dry run
+$TOOL register --repo "$REPO" --version "$VERSION" --on-commit --post   # once
+``` Then `status`
 again, after a minute:
 
 - *waiting* "the registration comment is posted": the bot has not answered yet; wait;
