@@ -62,10 +62,12 @@ the agent computes the number, and the gate refuses another one.
 | Merging the release PR | you | the agent, with `release.jl merge` only, after the tool checked what ran |
 | Registration comment (stable) | after your go | without asking |
 | `[merge approved]` on General, when betas explain a version jump | you, or the agent after your go | the agent |
-| Stops at every checkpoint | yes | only when something fails |
+| Stops | three times: after the proposal, before the merge (you merge), before the registration comment | once, after the proposal (version and mode), then only when something fails |
 
-A first release: use `supervised`. The `autonomous` mode has been run once, on CTBase
-v0.30.12; `supervised` has not yet been run end to end.
+A first release: use `supervised`. Each mode has run once: `autonomous` on CTBase v0.30.12
+(with Claude Code), `supervised` on CTModels v0.20.0 (with another agent). Between the
+stops, the agent goes on by itself: opening the tracking issue, the release PR and waiting
+for the checks do not need your go.
 
 Whatever the mode, the agent always asks you for the kind (if you did not give it), the
 version and the mode, and asks you before posting the registration comment on a
@@ -131,6 +133,13 @@ issue, a PR, a tag; and the registration comment is never posted twice.
   downstream package with the run on the base commit; a package that already failed
   there is shown ℹ️ and says nothing about your release. Only a package that passed on the
   base and fails with your release matters, and then the version must be breaking.
+- **While you have not merged, the tracking issue stays at phase 4, waiting**, even when
+  the checks are green and `release.jl ready` says ready: it is your turn. The CI takes
+  tens of minutes (the macOS jobs last the longest); the agent waits, it does not cancel
+  anything.
+- **The documentation preview needs its label.** If the repository has the label
+  `documentation push preview`, the agent adds it to the release PR; the gate reports it
+  with ℹ️ when it is missing, it does not block.
 - **Missing run labels show as ℹ️ in the release gate of the PR**, not as ❌: the gate runs
   once per label added, so its first runs see some labels only. What counts is
   `release.jl ready`, which reads what actually ran and asks for every job a label gates.
