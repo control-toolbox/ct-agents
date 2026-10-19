@@ -78,7 +78,9 @@ version (phase 1), the mode (phase 1).
   every session and before every outward action. Its phase and next action rule; when it
   says *blocked*, stop and report its blockers.
 - **The tracking issue is the trace.** Every phase ends with **one new comment** on it,
-  never an edit of an earlier one, ending with the marker of
+  never an edit of an earlier one, with the
+  [progress list](release-issue.md#the-progress-list) marked so far (✅ done, ❌ the step
+  that stopped the release), ending with the marker of
   [`release-issue.md`](release-issue.md#the-state-marker), for the reader: the state is
   recomputed by `status`, not read from the marker.
 - **The registration bot is never mentioned, except once** (`REL6`). Not in the issue
@@ -336,7 +338,7 @@ Comment: the General PR and its merge, or the ct-registry commit.
 ### 8. Close
 
 Ensure: `status` says phase 8, todo. Final comment ([template](release-issue.md#final-comment)):
-the checklist, every link, what was left as is and why, the follow-ups (downstream
+the progress list, every step ✅ with its link, what was left as is and why, the follow-ups (downstream
 `[compat]`: CompatHelper opens those PRs). Then:
 
 ```bash
@@ -375,4 +377,5 @@ In both modes, and whatever was validated before:
 - anything not covered by this recipe.
 
 Whenever you stop, comment on the tracking issue (once it exists) with the reason, the
-output of `status`, and the state of the worktree: the next session resumes from there.
+output of `status`, the state of the worktree, and the progress list with ❌ on the step
+that stopped: the next session resumes from there.
