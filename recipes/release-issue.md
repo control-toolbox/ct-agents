@@ -113,22 +113,16 @@ Next: <autonomous: merge | supervised: @<human>, the PR is ready for you to merg
 
 ## Registration comment
 
-Phase 7, stable only, **posted once**. The mention is built by `printf`, so that it exists
-nowhere before this command runs:
+Phase 7, stable only, **posted once**, by the release tool — never by hand:
 
 ```bash
-gh release view "v$VERSION" -R "$REPO" --json body --jq .body > whats-changed.md
-{
-  printf '%s%s register\n\nRelease notes:\n\n' '@' 'JuliaRegistrator'
-  cat release-notes.md      # the CHANGELOG section of VERSION, links made absolute at the tag
-  echo
-  cat whats-changed.md      # the notes of the GitHub release, made by ReleaseTag
-} > registration.md
-gh issue comment "$ISSUE" -R "$REPO" --body-file registration.md
+$TOOL register --repo "$REPO" --version "$VERSION"          # dry run, the mention masked
+$TOOL register --repo "$REPO" --version "$VERSION" --post   # refused unless status says phase 7, todo
 ```
 
-`release-notes.md` is the `## [<VERSION>]` section of `CHANGELOG.md` without its heading;
-relative links (`BREAKING.md`) become `https://github.com/<REPO>/blob/v<VERSION>/BREAKING.md`.
+It is the bot's mention and command, `Release notes:`, the `## [<VERSION>]` entry of
+`CHANGELOG.md` (relative links made absolute at the tag), then the notes of the GitHub
+release. The mention is built by the tool, so it exists in no file and in no command.
 
 ## Final comment
 

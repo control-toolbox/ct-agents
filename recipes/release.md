@@ -114,10 +114,12 @@ version (phase 1), the mode (phase 1).
 Read only: nothing is written, so nothing is posted if the human stops at phase 1.
 
 1. **Kind.** Known, or ask (see [Trigger](#trigger)).
-2. **Status.** `$TOOL status --repo "$REPO"`. It must be phase 0 (nothing in progress, the
-   last release complete). Any other phase is a release in progress: resume it from that
-   phase instead of starting another. *Blocked* (e.g. the last version registered without
-   tag) is a stop: report it.
+2. **Status.** `$TOOL status --repo "$REPO"`, without version: it reports the release in
+   progress, if any, else the version on `main`. It must say *done* (the last release is
+   complete) — then `$TOOL status --repo "$REPO" --version <the new one>` says phase 0.
+   Any other answer is a release in progress: resume it from that phase instead of
+   starting another. *Blocked* (e.g. the last version registered without tag) is a stop:
+   report it.
 3. **`main`.** Up to date and green:
 
    ```bash
@@ -274,13 +276,22 @@ General PR. Any other answer: follow it, or stop.
 
 #### Stable — General
 
-**`supervised` ⏸:** ask the human for the go. Post the
-[registration comment](release-issue.md#registration-comment), **once**. Then `status`
+Show the comment first — a dry run, the mention masked — then, **`supervised` ⏸**, ask
+the human for the go, and post it with the same command:
+
+```bash
+$TOOL register --repo "$REPO" --version "$VERSION"          # dry run
+$TOOL register --repo "$REPO" --version "$VERSION" --post   # once
+```
+
+`register` refuses unless `status` says phase 7, todo, so it never posts twice; it checks
+afterwards that the issue holds one mention. Never post the comment by hand. Then `status`
 again, after a minute:
 
+- *waiting* "the registration comment is posted": the bot has not answered yet; wait;
 - *waiting* on a General PR: note it;
-- *blocked* "the registration comment is posted but General has no PR": read the bot's
-  answer on the issue; **never post again**; report to the human, who decides.
+- *blocked* on the bot's error answer: **never post again**; report to the human, who
+  decides.
 
 If the gate reported a **jump** (`REL3`): in `supervised` mode, ask the human to comment
 `[merge approved]` on the General PR, or for the go to do it; in `autonomous` mode, post it
