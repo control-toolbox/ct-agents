@@ -91,6 +91,13 @@ goes on except on a stop condition and merges only through the tool. Both run th
 phases and the same commands, so that the remote agent (a GitHub bot triggered from an
 issue comment) runs the same recipe with another driver.
 
+**12. The procedure is versioned and its version is cited.** ct-agents has SemVer tags; a
+package pins one in `AGENTS.md` and reads the recipes from a clone at that tag, as it does
+for the conventions. A change to a recipe therefore reaches a package when it bumps its pin,
+not at once, and a report can say which version of the procedure it applied. The cost is a
+bump in each package when a recipe changes in a way that matters. The release tool (CTActions)
+is not versioned yet: the proposal cites its commit.
+
 ## What each safeguard answers
 
 | Safeguard | Failure it prevents, or one that happened |

@@ -161,7 +161,11 @@ Read only: nothing is written, so nothing is posted if the human stops at phase 
 
 Present the [proposal](release-issue.md#proposal) (in remote mode, as a comment on the
 issue of the trigger): the version and its reasoning, the recap of the changes, what the
-agent will do, what the human will do, the open PRs, the jump if any, the modes available.
+agent will do, what the human will do, the open PRs, the jump if any, the modes available,
+and **the versions applied**: the ct-agents tag of this recipe (`git -C .ct-agents describe
+--tags`, the clone `AGENTS.md` pins), the ct-conventions tag pinned in `AGENTS.md`, and the
+commit of the CTActions clone the tool runs from (`git -C "$ROOT/CTActions" rev-parse
+--short HEAD`).
 Then ask, and **wait**:
 
 1. Is the version right?
