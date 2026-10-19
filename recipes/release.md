@@ -14,10 +14,11 @@ This file says who does what, in which order. The texts the agent posts are in
 1. **Checked by tools, not by care.** Every rule that a tool can decide is decided by the
    release tool of CTActions,
    [`scripts/release/release.jl`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-release-tool),
-   and every check that must hold before a merge is a **required check** of `main`: the
-   release gate (`REL1`–`REL7`) and the breakage report (`REL1` against the base). Merging
-   is done by GitHub's auto-merge, which waits for them. An agent that skips a step, or a
-   human who forgets a script, cannot merge a release that breaks a rule.
+   and the merge itself goes through it: `release.jl merge` checks what actually ran on the
+   head commit of the PR — the release gate (`REL1`–`REL7`), the breakage report (`REL1`
+   against the base), every job the release needs — and only then merges, at that commit.
+   Never GitHub's auto-merge: it trusts check names, which label-gated runs make green while
+   the real tests fail or still run.
 2. **The state comes from the facts.** `release.jl status` computes where a release stands
    from GitHub and the registries — never from memory, never from a comment. Every session
    starts with it, and every outward action is preceded by it. A release interrupted by
@@ -55,7 +56,7 @@ The human chooses the mode in phase 1:
 
 | | `supervised` | `autonomous` |
 | --- | --- | --- |
-| Merging the release PR | the human merges, or enables auto-merge | the agent enables auto-merge; GitHub merges when the required checks pass |
+| Merging the release PR | the human, after `release.jl ready` (or with `release.jl merge`) | the agent, with `release.jl merge` only |
 | Posting the registration comment | after the human's go | without asking |
 | `[merge approved]` on General (`REL3`) | the human, or the agent after the human's go | the agent, if betas explain the jump |
 | Everything else | same in both modes | same in both modes |
@@ -63,14 +64,9 @@ The human chooses the mode in phase 1:
 In `supervised` mode the agent stops at every checkpoint marked **⏸** below and waits for
 a go. In `autonomous` mode it goes on, except on a stop condition.
 
-**`autonomous` needs the protections.** Offer it only when the repository has them — else
-only `supervised` (say why):
-
-```bash
-gh api "repos/$REPO" --jq .allow_auto_merge                                   # true
-gh api "repos/$REPO/branches/main/protection" --jq '[.required_status_checks.strict, [.required_status_checks.checks[].context]]'
-# strict true, and the contexts include the release gate and the breakage report
-```
+**`autonomous` needs the release callers.** Offer it only when the package has
+`ReleaseGate.yml` (else `release.jl merge` cannot see the gate's run) — else only
+`supervised`, and say why.
 
 **Always asked, whatever the mode:** the kind (stable or beta, when not given), the
 version (phase 1), the mode (phase 1).
@@ -102,9 +98,9 @@ version (phase 1), the mode (phase 1).
 | 0 | Preflight | agent, read only | `status`, the commands below | — |
 | 1 | Proposal | agent, then the human | — | **always**, both modes |
 | 2 | Tracking issue | agent | `status` | — |
-| 3 | Release PR | agent | `release.jl gate`, locally then as a required check | — |
-| 4 | Checks | CI | required checks | — |
-| 5 | Merge | GitHub (auto-merge) or the human | branch protection | the human merges |
+| 3 | Release PR | agent | `release.jl gate`, locally then in the PR | — |
+| 4 | Checks | CI | `release.jl ready` | — |
+| 5 | Merge | agent (`release.jl merge`) or the human | `release.jl ready` | the human merges |
 | 6 | Tag and GitHub release | the `ReleaseTag` workflow | `status` | — |
 | 7 | Registration | agent (stable: one comment; beta: LocalRegistry) | `status` | ⏸ before the comment |
 | 8 | Close | agent | `status` | — |
@@ -209,7 +205,7 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
    ```
 
    Plus `documentation push preview` when the repository has it.
-5. **The gate, locally**, before anything is pushed — the same command the required check
+5. **The gate, locally**, before anything is pushed — the same command the PR's gate
    runs:
 
    ```bash
@@ -219,13 +215,12 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
 
    Fix what it refuses (it says which rule), or stop if the fix is not a release-file edit.
 6. Push; open the PR; add the labels **after** creation (the label-gated callers react to
-   `labeled`); in `autonomous` mode, enable auto-merge:
+   `labeled`). Never enable auto-merge.
 
    ```bash
    gh pr create -R "$REPO" --base main --head "release/v$VERSION" \
      --title "chore: prepare $NAME v$VERSION release" --body-file "$PR_BODY"
    gh pr edit "$PR" -R "$REPO" --add-label "<label>" ...
-   gh pr merge "$PR" -R "$REPO" --auto --merge           # autonomous only
    ```
 
    `$PR_BODY`: what the release contains in two or three lines, `Refs #<issue>` (never
@@ -233,20 +228,29 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
 
 ### 4. Checks
 
-Wait for every check of the PR to end (Claude Code: see
+Wait for the checks of the PR (Claude Code: see
 [`adapters/claude-code.md`](../adapters/claude-code.md#waiting-for-pull-request-checks)),
-then comment the [checks summary](release-issue.md#checks-summary): the gate's table, the
-breakage report (its release check included), every other check. A failed check is a stop
-in both modes: the gate and the breakage report say which rule; fix the release files and
-push, or report.
+then ask the tool, which reads the runs and jobs that actually ran on the head commit —
+not the check names:
+
+```bash
+$TOOL ready --repo "$REPO" --pr "$PR"
+```
+
+*Wait*: a run is in progress, ask again later. *Not ready*: it says why — a job that
+failed, a job a label calls for that did not run (add the label: the workflow runs again),
+the gate or the breakage report refusing a rule (fix the release files and push), `main`
+moved (update the branch). Comment the [checks summary](release-issue.md#checks-summary):
+the output of `ready`, the gate's table, the breakage report. A failure is a stop in both
+modes.
 
 ### 5. Merge
 
-- **`autonomous`:** nothing to do: GitHub merges when the required checks pass and the
-  branch is up to date with `main` (`strict`). If `main` moved, update the branch
-  (`gh pr update-branch`), and the checks run again.
-- **`supervised` ⏸:** say that the PR is ready, and wait for the human to merge it or to
-  enable auto-merge.
+- **`autonomous`:** `$TOOL merge --repo "$REPO" --pr "$PR" --confirm`. It runs `ready`
+  again and merges at the head commit it checked (GitHub refuses if the head changed); if
+  it is not ready, nothing happens. Never `gh pr merge` directly.
+- **`supervised` ⏸:** say that `ready` says ready, and wait for the human, who merges it
+  (or runs `release.jl merge`).
 
 `status` then says phase 6. Comment: the merge commit.
 
@@ -353,9 +357,8 @@ locally:
 - the callers `ReleaseGate.yml`, `ReleaseTag.yml` and `Breakage.yml` on
   `breakage-suite.yml` (see CTActions' [workflows](https://github.com/control-toolbox/CTActions/blob/main/docs/README.md));
 - `Documentation.yml` accepts `workflow_dispatch` (`ReleaseTag` runs it on the tag);
-- `allow_auto_merge` on, and `main` protected with `strict` required checks: the release
-  gate, the CI and documentation aggregators (`ci-ok`, `docs-ok`), the breakage report —
-  see CTActions' [Required checks](https://github.com/control-toolbox/CTActions/blob/main/docs/conventions/required-checks.md).
+- no repository setting: `release.jl ready` and `merge` read what ran, whatever the
+  branch protection (see CTActions' [The merge](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-merge)).
 
 ## Stop and report when
 
