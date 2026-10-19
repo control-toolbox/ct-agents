@@ -33,7 +33,7 @@ Paste the output in the first comment of the PR (or in the comment on the issue)
 | File | Expected | Action |
 | --- | --- | --- |
 | `.JuliaFormatter.toml` | `style = "blue"` | add it if missing; if it names another style, **stop and report** |
-| `_typos.toml` | excludes `.conventions/` (theme 1) | nothing else: the word lists are package-specific |
+| `_typos.toml` | excludes `.ct-conventions/` and `.ct-agents/` (theme 1) | nothing else: the word lists are package-specific |
 | `.markdownlint.json` | exactly the content of [`GEN2`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/general.md) (ct-conventions ≥ v0.4.0) | replace or create it; remove every `<!-- markdownlint-disable … -->` comment from the tracked `.md` files and list them |
 | `formatter.lock` | — | nothing: the Formatter workflow writes it |
 | `docs/src/.vitepress/config.mts` | no `logo` / favicon placeholder when the package ships no logo ([`site.md`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/site.md), notes on the VitePress backend, "No logo / no favicon") | if `docs/src/assets/` has no `logo.{png,svg}` nor `favicon.ico`, delete the two lines `['link', { rel: 'icon', href: 'REPLACE_ME_DOCUMENTER_VITEPRESS_FAVICON' }],` and `logo: 'REPLACE_ME_DOCUMENTER_VITEPRESS',`; if the package ships a logo, leave them |

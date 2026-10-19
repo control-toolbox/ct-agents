@@ -4,7 +4,7 @@ Part of [`harmonize.md`](harmonize.md): read its ground rules, protocol (issues,
 linking) and narration first. This file only holds what is specific to theme 1.
 
 Align one control-toolbox package on [ct-conventions](https://github.com/control-toolbox/ct-conventions):
-a tag pinned in `AGENTS.md` and read from a git-ignored clone in `.conventions/`, an
+a tag pinned in `AGENTS.md` and read from a git-ignored clone in `.ct-conventions/`, an
 `AGENTS.md` that cites rule identifiers, a `CLAUDE.md` that only redirects. Mechanical
 and checkable.
 
@@ -30,9 +30,9 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    # only if the package has a submodule (.handbook or .conventions):
    for f in .handbook .conventions .gitmodules; do git rm -rfq --ignore-unmatch "$f"; done
    rm -rf .handbook .conventions
-   printf '\n# ct-conventions, cloned at the tag pinned in AGENTS.md\n.conventions/\n' >> .gitignore
+   printf '\n# ct-conventions, cloned at the tag pinned in AGENTS.md\n.ct-conventions/\n' >> .gitignore
    git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" \
-     https://github.com/control-toolbox/ct-conventions.git .conventions
+     https://github.com/control-toolbox/ct-conventions.git .ct-conventions
    ```
 
    `.gitmodules` must not exist afterwards, unless it lists another submodule: then stop
@@ -67,7 +67,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    nothing:
 
    ```bash
-   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # AFTER
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.ct-conventions --exclude-dir=.ct-agents --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # AFTER
    ```
 
    Report both counts in the step 4 comment, and the list as `old → new (rule)`.
@@ -92,7 +92,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
 
    | Found | Replace by |
    | --- | --- |
-   | `.handbook/` in `_typos.toml` or similar lists | `.conventions/` |
+   | `.handbook/` in `_typos.toml` or similar lists | `.ct-conventions/` |
    | link to the Handbook repository | link to `https://github.com/control-toolbox/ct-conventions` |
    | `WORKFLOWS.md` of the Handbook | `https://github.com/control-toolbox/CTActions/blob/main/docs/WORKFLOWS.md` |
    | `VITEPRESS-DOC.md`, "Plot image format" | `SITE12` |
@@ -136,7 +136,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
 
    ## Developer Resources
 
-   The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is pinned to a SemVer release tag in `AGENTS.md` ("Pinned version"). Read it from a local clone in `.conventions/`, which git ignores; `AGENTS.md` gives the clone command.
+   The [ct-conventions](https://github.com/control-toolbox/ct-conventions) repository (coding rules, method, plan template) is pinned to a SemVer release tag in `AGENTS.md` ("Pinned version"). Read it from a local clone in `.ct-conventions/`, which git ignores; `AGENTS.md` gives the clone command.
 
    It is not a git submodule: `Pkg.add` on Julia 1.10 fails on a package whose tree contains one (`cannot get submodules without a working tree`). To bump it, change the tag in `AGENTS.md` (the "Pinned version" line and the clone command), then re-clone.
    ```
@@ -145,7 +145,7 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
    not edit `README.md` by hand.
 
 6. **`_typos.toml`.** The local clone must not be spell-checked. In the `extend-exclude`
-   list of `[files]`, add `".conventions/",` (CTBase.jl has it). If the file or the list
+   list of `[files]`, add `".ct-conventions/",` and `".ct-agents/",` (CTBase.jl has them). If the file or the list
    does not exist, create it with that entry only, and say so in the comment. Do not touch
    the other entries.
 
@@ -158,11 +158,11 @@ Branch and worktree: `chore/pin-ct-conventions`, `.worktrees/$PKG-pin-convention
 
    ```bash
    git ls-files -s | grep -c '^160000'                     # 0: no submodule in the tree
-   git check-ignore -q .conventions && echo ignored         # ignored
-   git -C .conventions describe --tags                     # $TAG
+   git check-ignore -q .ct-conventions && echo ignored         # ignored
+   git -C .ct-conventions describe --tags                     # $TAG
    grep -c 'ct-conventions' CONTRIBUTING.md                # at least 1
-   grep -n 'conventions' _typos.toml                       # the .conventions/ exclusion
-   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.conventions --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
+   grep -n 'conventions' _typos.toml                       # the .ct-conventions/ exclusion
+   grep -rnIi handbook . --exclude-dir=.git --exclude-dir=.ct-conventions --exclude-dir=.ct-agents --exclude=CHANGELOG.md --exclude=BREAKING.md | wc -l   # 0
    git diff --stat origin/main -- src ext                  # only comment lines, if any
    git diff origin/main -- src ext | grep '^[+-][^+-]' | grep -v '^[+-][[:space:]]*#' | wc -l   # 0
    git -C "$ROOT/$PKG" status --short | diff - "/tmp/$PKG-status-before.txt"   # no output
@@ -191,10 +191,10 @@ Quick-reference for any agent working on this repository.
 
 ## Repository Layout
 
-<keep the package's own layout; add the `.conventions/` line>
+<keep the package's own layout; add the `.ct-conventions/` line>
 
 ```text
-.conventions/  # ct-conventions, cloned at the pinned tag (git-ignored)
+.ct-conventions/  # ct-conventions, cloned at the pinned tag (git-ignored)
 .ct-agents/    # ct-agents, cloned at the pinned tag (git-ignored)
 ```
 
@@ -204,13 +204,13 @@ Quick-reference for any agent working on this repository.
 
 The coding conventions live in
 [ct-conventions](https://github.com/control-toolbox/ct-conventions), pinned below to a
-SemVer release tag (`vX.Y.Z`). Read them from a local clone in `.conventions/`
-(git-ignored, not a submodule). If it is missing, or `git -C .conventions describe --tags`
+SemVer release tag (`vX.Y.Z`). Read them from a local clone in `.ct-conventions/`
+(git-ignored, not a submodule). If it is missing, or `git -C .ct-conventions describe --tags`
 is not the pinned tag, (re)create it:
 
 ```bash
-rm -rf .conventions
-git -c advice.detachedHead=false clone --quiet --depth 1 --branch <TAG> https://github.com/control-toolbox/ct-conventions.git .conventions
+rm -rf .ct-conventions
+git -c advice.detachedHead=false clone --quiet --depth 1 --branch <TAG> https://github.com/control-toolbox/ct-conventions.git .ct-conventions
 ```
 
 **Pinned version: ct-conventions <TAG>.** Cite rules by identifier (`MOD3`, `TST1`), and
@@ -220,10 +220,10 @@ Read in this order:
 
 | File | Content |
 | --- | --- |
-| [`rules/general.md`](.conventions/rules/general.md) | Rules that hold everywhere — **always read** |
-| [`README.md`](.conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`, `REL`) |
-| [`method.md`](.conventions/method.md) | How to work: tests, coverage, docs build, output capture |
-| [`plan-template.md`](.conventions/plan-template.md) | Template for a substantial piece of work |
+| [`rules/general.md`](.ct-conventions/rules/general.md) | Rules that hold everywhere — **always read** |
+| [`README.md`](.ct-conventions/README.md) | Index of the rule files, one per area (`MOD`, `TYP`, `DIM`, `EXC`, `PERF`, `DOC`, `TST`, `SITE`, `CHG`, `REL`) |
+| [`method.md`](.ct-conventions/method.md) | How to work: tests, coverage, docs build, output capture |
+| [`plan-template.md`](.ct-conventions/plan-template.md) | Template for a substantial piece of work |
 
 How agents behave on these repositories is described in
 [ct-agents](https://github.com/control-toolbox/ct-agents).
@@ -239,7 +239,7 @@ How agents behave on these repositories is described in
 - **Structured errors** — seven typed exceptions; pick by the choice rule (`EXC1`).
 - **Type stability enforced** — hot paths `@inferred`-clean, verified with JET (`TYP8`, `PERF1`–`PERF5`).
 - **1-D is a scalar** — a one-dimensional state/control/variable is a `Number` (`DIM1`).
-- **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
+- **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.ct-conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
 - **Docstrings last** — written once the implementation is stable (`DOC1`–`DOC8`).
 - **The human merges** — an agent never merges a pull request, except a release PR in `autonomous` mode, and then only with `release.jl merge` (see below).
 
@@ -287,11 +287,22 @@ sed -i '' -E "s/ct-conventions v[0-9]+\.[0-9]+\.[0-9]+\./ct-conventions $TAG./; 
 sed -i '' -E "s/ct-agents v[0-9]+\.[0-9]+\.[0-9]+\./ct-agents $AGENTS_TAG./; s#--branch v[0-9]+\.[0-9]+\.[0-9]+ (https://github.com/control-toolbox/ct-agents)#--branch $AGENTS_TAG \1#" AGENTS.md
 rm -rf .ct-agents && git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$AGENTS_TAG" \
   https://github.com/control-toolbox/ct-agents.git .ct-agents
-rm -rf .conventions && git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" \
-  https://github.com/control-toolbox/ct-conventions.git .conventions
+rm -rf .ct-conventions && git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$TAG" \
+  https://github.com/control-toolbox/ct-conventions.git .ct-conventions
 ```
 
 If the package still has a `.conventions` submodule, do step 1 first.
+
+**Moving from `.conventions/` (before ct-conventions v0.7.1 and ct-agents v0.2.0).** The
+clone was named `.conventions/`; it is now `.ct-conventions/`, as `.ct-agents/`. The old
+name never occurs inside the new one, so one replacement is safe and can be run twice:
+
+```bash
+sed -i '' 's/\.conventions/.ct-conventions/g' AGENTS.md .gitignore CONTRIBUTING.md _typos.toml   # those that exist
+rm -rf .conventions                                   # the old clone, now unused
+```
+
+then clone as above and add the `.ct-agents/` lines (layout, `.gitignore`, `_typos.toml`).
 
 Check the package against the rules the new release adds or tightens (its `CHANGELOG.md`
 entry), say the result in the PR body, and add a changelog line — or, if the previous pin
