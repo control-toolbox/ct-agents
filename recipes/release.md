@@ -332,7 +332,8 @@ locally:
   `breakage-suite.yml` (see CTActions' [workflows](https://github.com/control-toolbox/CTActions/blob/main/docs/README.md));
 - the organization App's secrets visible to the repository (for `ReleaseTag`);
 - `allow_auto_merge` on, and `main` protected with `strict` required checks: the release
-  gate, the breakage report, and the CI.
+  gate, the CI and documentation aggregators (`ci-ok`, `docs-ok`), the breakage report —
+  see CTActions' [Required checks](https://github.com/control-toolbox/CTActions/blob/main/docs/conventions/required-checks.md).
 
 ## Stop and report when
 
