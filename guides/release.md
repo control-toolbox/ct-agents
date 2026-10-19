@@ -21,6 +21,11 @@ the procedure the agent follows is [`recipes/release.md`](../recipes/release.md)
 The packages released this way are **CTBase, CTModels, CTSolvers, CTFlows, CTDirect,
 CTParser, CTLie and OptimalControl**. Check:
 
+- **The recipe is pinned.** `AGENTS.md` names the ct-agents tag it applies ("Pinned version:
+  ct-agents vX.Y.Z") and the agent reads the recipe from a git-ignored clone in
+  `.ct-agents/`, as it reads the conventions from `.conventions/`. Its proposal states the
+  versions applied (ct-agents, ct-conventions, CTActions): check them. A package that does
+  not pin ct-agents yet is read from `main`.
 - **The package has the release workflows**: `ReleaseGate.yml`, `ReleaseTag.yml`, a
   `Breakage.yml` on `breakage-suite.yml`, and a `Documentation.yml` that accepts
   `workflow_dispatch`. The eight packages above have them. Without `ReleaseGate.yml`

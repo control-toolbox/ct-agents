@@ -49,7 +49,38 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
 | [`guides/release.md`](guides/release.md) | **For a developer**: how to release a package with an agent — what to say, the two modes, what happens, what to do when it stops, and the commands by hand |
 | [`design/release.md`](design/release.md) | Why the release is built this way (state from the facts, rules as scripts, no auto-merge, breakage as evidence) and its known limits |
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed in each tagged version |
 | [`recipes/release.md`](recipes/release.md) | Releasing a package, stable or beta, on top of CTActions' release tool (`status`, `gate`, `ready`, `merge`, `register`): proposal, tracking issue, release PR, checked merge, tag, registration; `supervised` and `autonomous` modes. Texts: [`release-issue.md`](recipes/release-issue.md) |
+
+## Versioning
+
+ct-agents follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with tags
+`vX.Y.Z`, so that a package pins the version of the procedures it applies and a report can
+cite it. The public interface is the **procedure**: the phases, the commands, the stop
+conditions and the texts a recipe prescribes.
+
+| | What triggers it |
+| --- | --- |
+| **major** | a phase, a command or a stop condition of a recipe changes meaning, is removed or reordered |
+| **minor** | a step is added, tightened or made precise; a recipe, a guide or an adapter is added |
+| **patch** | rewording, examples, typos, links |
+
+While the version is `0.x`, a minor bump may contain breaking changes.
+
+A package pins a tag in its `AGENTS.md` ("Pinned version: ct-agents vX.Y.Z") and reads the
+recipes from a git-ignored clone in `.ct-agents/`, as it does for ct-conventions (see
+[`recipes/pin-conventions.md`](recipes/pin-conventions.md)). An agent states the version it
+applied in its plans and reports.
+
+## Releasing
+
+1. Move the `[Unreleased]` entries of [`CHANGELOG.md`](CHANGELOG.md) under a new
+   `## [X.Y.Z] - YYYY-MM-DD` heading.
+2. Merge the change on `main`.
+3. That is all: on the push to `main`, the [`Release`](.github/workflows/release.yml)
+   workflow tags the merge commit `vX.Y.Z` and creates the GitHub release, with the
+   changelog section as notes. It does nothing if the first `## [X.Y.Z]` section is
+   already tagged; it can be rerun by hand (`workflow_dispatch`).
 
 ## Layout
 

@@ -31,6 +31,7 @@ posted as the first comment of the tracking issue once validated.
 **Version.** Last release `<LAST>`; last version in General `<LAST_STABLE>`. Since `<PREV>`: <breaking change(s): list | new features | fixes only>. By `REL1` (<0.Y.Z: the breaking component is Y | X ≥ 1: …>) and `REL2` (<the triple must be above every one released: …>), the version is **`<VERSION>`**.
 **Jump in General (`REL3`).** <none | `<LAST_STABLE>` → `<VERSION>`: skipped `<…>`, all betas in ct-registry: `[merge approved]` needed on the General PR>.
 **Resolves from General alone (`REL4`).** <✅ | not checked: beta>.
+**Versions applied.** ct-agents `<TAG>` (this recipe), ct-conventions `<TAG>`, CTActions `<commit>` (the release tool).
 
 ### What changes since `<PREV>`
 
