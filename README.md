@@ -16,7 +16,8 @@ rules by identifier (`MOD3`, `TST1`) and procedures by link into `ct-conventions
 never copies them.
 
 > **Status.** Documentation only: the agent base, one harness adapter, one setup note
-> and one recipe, moved out of the former Handbook. Roles and workflows come later.
+> and the recipes. Roles and workflows come later; the release recipe is written so that
+> its phases can become one.
 
 ## Two modes, one base
 
@@ -46,6 +47,7 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`setup/github-pat.md`](setup/github-pat.md) | GitHub MCP server and fine-grained personal access tokens |
 | [`recipes/harmonize.md`](recipes/harmonize.md) | Harmonizing the repositories of the ecosystem: shared protocol (issues, worktree, PR narration), the [issue description](recipes/harmonize-issue.md), and the themes — [`pin-conventions.md`](recipes/pin-conventions.md), [`labels.md`](recipes/labels.md), [`issue-templates.md`](recipes/issue-templates.md), [`lint-and-automation.md`](recipes/lint-and-automation.md) |
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
+| [`recipes/release.md`](recipes/release.md) | Releasing a package, stable or beta, on top of CTActions' release tool (`status`, `gate`) and required checks: proposal, tracking issue, release PR, auto-merge, tag, registration; `supervised` and `autonomous` modes. Texts: [`release-issue.md`](recipes/release-issue.md) |
 
 ## Layout
 
