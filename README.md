@@ -47,6 +47,8 @@ log — comes with the first roles; `ocourses/agents` is its reference implement
 | [`setup/github-pat.md`](setup/github-pat.md) | GitHub MCP server and fine-grained personal access tokens |
 | [`recipes/harmonize.md`](recipes/harmonize.md) | Harmonizing the repositories of the ecosystem: shared protocol (issues, worktree, PR narration), the [issue description](recipes/harmonize-issue.md), and the themes — [`pin-conventions.md`](recipes/pin-conventions.md), [`labels.md`](recipes/labels.md), [`issue-templates.md`](recipes/issue-templates.md), [`lint-and-automation.md`](recipes/lint-and-automation.md) |
 | [`recipes/vitepress-migration.md`](recipes/vitepress-migration.md) | Migrating a package's docs from Documenter to DocumenterVitepress |
+| [`guides/release.md`](guides/release.md) | **For a developer**: how to release a package with an agent — what to say, the two modes, what happens, what to do when it stops, and the commands by hand |
+| [`design/release.md`](design/release.md) | Why the release is built this way (state from the facts, rules as scripts, no auto-merge, breakage as evidence) and its known limits |
 | [`recipes/release.md`](recipes/release.md) | Releasing a package, stable or beta, on top of CTActions' release tool (`status`, `gate`, `ready`, `merge`, `register`): proposal, tracking issue, release PR, checked merge, tag, registration; `supervised` and `autonomous` modes. Texts: [`release-issue.md`](recipes/release-issue.md) |
 
 ## Layout
@@ -56,6 +58,8 @@ base.md        shared behavior, provider-independent
 adapters/      one file per harness (Claude Code, …): tools and habits specific to it
 setup/         one-time machine or account setup
 recipes/       step-by-step procedures for recurring tasks, future roles
+guides/        for a developer: how to ask an agent for a task, and what to expect
+design/        why a task is built the way it is, and its limits
 ```
 
 A **harness adapter** holds only what depends on the tool running the agent. Anything
