@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-19
+
+### 🔧 Changed
+
+- The clone of ct-conventions in a package is named `.ct-conventions/` instead of
+  `.conventions/`, as the clone of ct-agents is `.ct-agents/` (ct-conventions v0.7.1). The
+  `AGENTS.md` template, its clone commands, the `.gitignore` and `_typos.toml` entries and
+  the bump commands of [`recipes/pin-conventions.md`](recipes/pin-conventions.md) follow, with
+  a section to move a package from the former name. The old name does not occur in the new
+  one, so one `sed` does it.
+
 ## [0.1.0] - 2026-10-19
 
 First tagged version. Until now the repository was read from `main`, so a change reached

@@ -5,7 +5,7 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 
 ## Before working
 
-- Read the package's `AGENTS.md`, then the conventions it pins (`.conventions/`):
+- Read the package's `AGENTS.md`, then the conventions it pins (`.ct-conventions/`):
   [`rules/general.md`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/general.md)
   always, then the rule file of the area you touch.
 - Follow the procedures of
@@ -15,7 +15,7 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
   [`plan-template.md`](https://github.com/control-toolbox/ct-conventions/blob/main/plan-template.md)
   and wait for confirmation. **Remote mode:** the process is still to be defined.
 - State the conventions version you apply in plans and reports
-  (`git -C .conventions describe --tags --always`), and cite rules by identifier.
+  (`git -C .ct-conventions describe --tags --always`), and cite rules by identifier.
 
 ## Git & commits
 

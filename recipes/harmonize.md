@@ -141,7 +141,7 @@ Once the human has merged (not before):
 
 ```bash
 cd "$ROOT/$PKG"
-git worktree remove --force "$ROOT/.worktrees/$PKG-<theme>"   # --force: it contains the git-ignored .conventions/ clone
+git worktree remove --force "$ROOT/.worktrees/$PKG-<theme>"   # --force: it contains the git-ignored .ct-conventions/ and .ct-agents/ clones
 git worktree prune
 git branch -D chore/<theme>
 ```
