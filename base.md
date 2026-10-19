@@ -35,6 +35,11 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
 
 - **Read before editing**; do not overwrite a file you have not read.
 - An edit should match the surrounding code (style, naming, comment density).
+- Treat generated files as outputs, not sources. In repositories using the
+  `CTActions` UpdateReadme workflow, edit `README.template.md` or the relevant
+  source in `control-toolbox/.github`; do not edit `README.md` or the generated
+  `CONTRIBUTING.md` directly. If a generated output is unexpectedly wrong, trace
+  it to its template, shared source, or workflow before changing anything.
 
 ## Ask vs proceed
 
