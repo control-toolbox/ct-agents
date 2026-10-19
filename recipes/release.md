@@ -252,8 +252,7 @@ push, or report.
 
 Done by the `ReleaseTag` workflow of the package, on the push of the merge: it tags the
 merge commit, creates the GitHub release (notes since the previous stable for a stable,
-`REL5`; a beta is a pre-release), as the organization's App so that the documentation of
-the tag deploys. Wait for it, then `status`: phase 7. If it did not run or failed, run it
+`REL5`; a beta is a pre-release), and runs the documentation workflow on the tag. Wait for it, then `status`: phase 7. If it did not run or failed, run it
 again by hand — it never tags twice:
 
 ```bash
@@ -261,7 +260,9 @@ gh workflow run ReleaseTag.yml -R "$REPO" --ref main
 ```
 
 Check that the documentation workflow of the tag succeeded (`gh run list -R "$REPO"
---branch "v$VERSION"`); a failure there is reported, it does not stop the release.
+--branch "v$VERSION"`). If it did not run (the tag exists, so a rerun of `ReleaseTag` has
+nothing left to do), dispatch it: `gh workflow run Documentation.yml -R "$REPO" --ref
+"v$VERSION"`. A failure there is reported; it does not stop the release.
 Comment: the release URL.
 
 ### 7. Registration
@@ -330,7 +331,7 @@ locally:
 
 - the callers `ReleaseGate.yml`, `ReleaseTag.yml` and `Breakage.yml` on
   `breakage-suite.yml` (see CTActions' [workflows](https://github.com/control-toolbox/CTActions/blob/main/docs/README.md));
-- the organization App's secrets visible to the repository (for `ReleaseTag`);
+- `Documentation.yml` accepts `workflow_dispatch` (`ReleaseTag` runs it on the tag);
 - `allow_auto_merge` on, and `main` protected with `strict` required checks: the release
   gate, the CI and documentation aggregators (`ci-ok`, `docs-ok`), the breakage report —
   see CTActions' [Required checks](https://github.com/control-toolbox/CTActions/blob/main/docs/conventions/required-checks.md).
