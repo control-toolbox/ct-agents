@@ -61,8 +61,11 @@ The human chooses the mode in phase 1:
 | `[merge approved]` on General (`REL3`) | the human, or the agent after the human's go | the agent, if betas explain the jump |
 | Everything else | same in both modes | same in both modes |
 
-In `supervised` mode the agent stops at every checkpoint marked **⏸** below and waits for
-a go. In `autonomous` mode it goes on, except on a stop condition.
+**What the modes stop at.** In `supervised` mode the agent stops at the three checkpoints
+marked **⏸** below, and only there: after the proposal (phase 1), at the merge (phase 5,
+the human merges), and before the registration comment (phase 7). Phases 2, 3, 4 and 6 run
+without a stop, in both modes. In `autonomous` mode it stops after the proposal (the
+version and the mode are always asked) and then only on a stop condition.
 
 **`autonomous` needs the release callers.** Offer it only when the package has
 `ReleaseGate.yml` (else `release.jl merge` cannot see the gate's run) — else only
@@ -206,7 +209,10 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
    gh api orgs/control-toolbox/actions/runners --jq '.runners[]|"\(.name)\t\(.status)\t\(.busy)"'
    ```
 
-   Plus `documentation push preview` when the repository has it.
+   Plus `documentation push preview` when the repository has that label
+   (`gh label list -R "$REPO" --search preview`): the workflows do not require it, so the
+   gate only reports its absence (ℹ️), and without it no preview of the documentation is
+   deployed.
 5. **The gate, locally**, before anything is pushed — the same command the PR's gate
    runs:
 
@@ -230,16 +236,21 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
 
 ### 4. Checks
 
-Wait for the checks of the PR (Claude Code: see
-[`adapters/claude-code.md`](../adapters/claude-code.md#waiting-for-pull-request-checks)),
-then ask the tool, which reads the runs and jobs that actually ran on the head commit —
-not the check names:
+Ask the tool, which reads the runs and jobs that actually ran on the head commit — not the
+check names:
 
 ```bash
 $TOOL ready --repo "$REPO" --pr "$PR"
 ```
 
-*Wait*: a run is in progress, ask again later. *Not ready*: it says why — a job that
+*Wait*: a run is in progress, ask again later. **How to wait**: the CI of a package takes
+tens of minutes (three operating systems, three Julia versions; the macOS jobs are usually
+the last), so poll `ready` about once a minute, for up to two hours, without blocking the
+session if the harness allows it (Claude Code: see
+[`adapters/claude-code.md`](../adapters/claude-code.md#waiting-for-pull-request-checks)); never
+cancel or rerun a job that is still running. In `supervised` mode, `status` keeps saying
+phase 4, waiting, until the human merges, even when `ready` says ready: for this checkpoint
+`ready` is the answer. *Not ready*: it says why — a job that
 failed, a job a label calls for that did not run (add the label: the workflow runs again),
 the gate or the breakage report refusing a rule (fix the release files and push), `main`
 moved (update the branch). Comment the [checks summary](release-issue.md#checks-summary):
@@ -254,7 +265,9 @@ modes.
 - **`supervised` ⏸:** say that `ready` says ready, and wait for the human, who merges it
   (or runs `release.jl merge`).
 
-`status` then says phase 6. Comment: the merge commit.
+`status` then says phase 6. Comment: the merge commit. The `ReleaseTag` workflow is fast:
+the next `status` may already show the tag and the release (even phase 7). Post the comments
+in phase order anyway (5, then 6), each with the facts of its phase.
 
 ### 6. Tag and GitHub release
 

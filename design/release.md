@@ -107,8 +107,11 @@ issue comment) runs the same recipe with another driver.
 
 ## Known limits
 
-- **The `autonomous` mode has run once** (CTBase v0.30.12); `supervised` has not been run
-  end to end.
+- **Each mode has run once**: `autonomous` on CTBase v0.30.12 (Claude Code), `supervised`
+  on CTModels v0.20.0 (another agent, which found the recipe from `AGENTS.md` alone). Its
+  feedback, step by step, is on CTModels.jl#476; it led to the three stops of `supervised`
+  being stated, the wait being described, and the gate checking the encoding of the release
+  files.
 - **A failed documentation build of the tag** is reported, not retried: it must be rerun
   by hand (`gh workflow run Documentation.yml --ref vX.Y.Z`).
 - **The gate is strict on the expected version.** A number the maintainer prefers but the
