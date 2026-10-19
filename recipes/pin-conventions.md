@@ -240,7 +240,7 @@ How agents behave on these repositories is described in
 - **1-D is a scalar** — a one-dimensional state/control/variable is a `Number` (`DIM1`).
 - **Plan before code** — a local agent proposes a plan ([`plan-template.md`](.conventions/plan-template.md)) and waits for confirmation before working on code. The process for remote agents is still to be defined.
 - **Docstrings last** — written once the implementation is stable (`DOC1`–`DOC8`).
-- **The human merges** — an agent never merges a pull request, except a release PR in `autonomous` mode (see below).
+- **The human merges** — an agent never merges a pull request, except a release PR in `autonomous` mode, and then only with `release.jl merge` (see below).
 
 ---
 

@@ -43,7 +43,7 @@ posted as the first comment of the tracking issue once validated.
 
 1. Open the tracking issue `[RELEASE] v<VERSION>`, and comment on it at every phase.
 2. Open the PR `release/v<VERSION>` (`Project.toml`, `CHANGELOG.md`, `BREAKING.md`) after the release gate passed locally; labels <run labels, GPU: kkt or occidata>, `documentation push preview`.
-3. <autonomous: enable auto-merge: GitHub merges when the required checks pass (gate, breakage report, CI) | supervised: wait for you to merge it>.
+3. <autonomous: merge with `release.jl merge` once `release.jl ready` says ready (what actually ran on the head commit: gate, breakage report, every job the release needs) | supervised: wait for you to merge it, once `release.jl ready` says ready>.
 4. Summarize the checks on the issue.
 5. Wait for the `ReleaseTag` workflow: tag `v<VERSION>` and GitHub release, notes since `<PREV>`.
 6. <stable: post the registration comment, once (<supervised: after your go>), and follow the General PR to its merge | beta: register in ct-registry with LocalRegistry>.
@@ -57,7 +57,7 @@ Every step starts from `release.jl status`: if anything interrupts the release, 
 - <jump: comment `[merge approved]` on the General PR, or let the agent do it>
 - <anything else: none>
 
-**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails; <available: the repository has auto-merge and the required checks | not available: <why>>)?
+**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails; <available: the package has `ReleaseGate.yml`, and the agent merges only with `release.jl merge` | not available: <why>>)?
 ````
 
 ## Issue description
@@ -101,13 +101,11 @@ Phase 4:
 ```markdown
 **Phase 4 — Checks of #<PR>.**
 
-| Check | Result |
-| --- | --- |
-| <name> | ✅ / ❌ / skipped |
+<the output of `release.jl ready`, as is: one line per workflow, the run that counts and its verdict>
 
-Breakage: <link to the comment of the Breakage workflow, and its verdict>.
+Breakage: <link to the comment of the Breakage workflow, and its release check>.
 Documentation preview: <link, or not deployed>.
-Next: <autonomous: merge | supervised: @<human>, the PR is ready for you to merge>.
+Next: <autonomous: `release.jl merge` | supervised: @<human>, `release.jl ready` says ready: the PR is yours to merge>.
 <!-- ct-release … -->
 ```
 

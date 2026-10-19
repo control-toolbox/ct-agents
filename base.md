@@ -23,12 +23,12 @@ harness or the model. Harness-specific tools live in [`adapters/`](adapters/).
   mode, the agent works on a dedicated branch of a draft PR and the orchestration pushes;
   the human review of that PR is the approval.
 
-  **One exception: auto-merge on a release PR in `autonomous` mode** of
+  **One exception: a release PR in `autonomous` mode** of
   [`recipes/release.md`](recipes/release.md). When the human chose that mode for this
-  release, the agent may enable GitHub's auto-merge on the release PR. It never merges
-  itself: GitHub does, once the required checks of `main` pass (the release gate, the
-  breakage report, the CI) and the branch is up to date. Without those protections, the
-  mode is not offered and the human merges.
+  release, the agent may merge the release PR, **only with `release.jl merge`** of
+  CTActions: it checks what actually ran on the head commit (the release gate, the
+  breakage report, every job the release needs) and merges at that commit, or does
+  nothing. Never `gh pr merge` directly, never GitHub's auto-merge.
 
 ## Editing files
 
