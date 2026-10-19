@@ -65,21 +65,45 @@ Every step starts from `release.jl status`: if anything interrupts the release, 
 The organization's release template is not used: the agent writes this description.
 
 ````markdown
-Release of <NAME> v<VERSION> (<stable|beta>), prepared by an agent following [ct-agents/recipes/release.md](https://github.com/control-toolbox/ct-agents/blob/main/recipes/release.md). Progress is in the comments below, one per phase.
+Release of <NAME> v<VERSION> (<stable|beta>), prepared by an agent following [ct-agents/recipes/release.md](https://github.com/control-toolbox/ct-agents/blob/main/recipes/release.md). Progress is in the comments below, one per phase; each one repeats the steps, marked as far as they went.
 
-## Checklist
+## Steps
 
-- [ ] Version bumped in `Project.toml`
-- [ ] `CHANGELOG.md` / `BREAKING.md` up to date
-- [ ] CI, documentation and breakage checks are green
-- [ ] <stable: Resolves from General alone (`REL4`)>
-- [ ] Release PR merged
-- [ ] GitHub release and tag created
-- [ ] Registered (<General | ct-registry>)
+<the progress list, no step marked>
 ````
 
-The checklist is ticked in the final comment, not by editing the description: the
-description is written once.
+The description is written once, never edited.
+
+## The progress list
+
+The steps of the release, one line each. Every phase comment repeats the whole list: ✅ on
+a step done, ❌ on the step that stopped the release (with the reason, the release does
+not go on), nothing on a step not reached. Reading the comments in order shows how the
+release went. No check boxes: nobody ticks them.
+
+```markdown
+- Proposal validated: <stable|beta> `<VERSION>`, <supervised|autonomous>
+- <stable: Resolves from General alone (`REL4`)>
+- Release PR opened, the gate passed locally — `Project.toml`, `CHANGELOG.md`, `BREAKING.md`
+- Checks green (`release.jl ready`): CI, documentation, breakage, the gate
+- Release PR merged
+- Tag and GitHub release; documentation of the tag
+- Registered in <General | ct-registry>
+- Issue closed
+```
+
+E.g. after phase 4 of a stable, its checks failing:
+
+```markdown
+- ✅ Proposal validated: stable `0.30.12`, autonomous
+- ✅ Resolves from General alone (`REL4`)
+- ✅ Release PR opened, the gate passed locally — #625
+- ❌ Checks green (`release.jl ready`): `CI.yml`, run 392…: `test (1.12)` did not pass
+- Release PR merged
+- Tag and GitHub release; documentation of the tag
+- Registered in General
+- Issue closed
+```
 
 ## Phase comments
 
@@ -91,6 +115,8 @@ Done: <what was done, in one or two sentences>.
 Decisions: <each choice not dictated by the recipe, and why; or none>.
 Check: `<command>` → <actual result>.
 Next: <the next phase, and who acts: the agent, or the human (what is expected)>.
+
+<the progress list, marked>
 <!-- ct-release … -->
 ```
 
@@ -106,6 +132,8 @@ Phase 4:
 Breakage: <link to the comment of the Breakage workflow, and its release check>.
 Documentation preview: <link, or not deployed>.
 Next: <autonomous: `release.jl merge` | supervised: @<human>, `release.jl ready` says ready: the PR is yours to merge>.
+
+<the progress list, marked>
 <!-- ct-release … -->
 ```
 
@@ -127,13 +155,14 @@ release. The mention is built by the tool, so it exists in no file and in no com
 ```markdown
 **Phase 8 — <NAME> v<VERSION> is released.**
 
-- [x] Version bumped in `Project.toml` — #<PR>
-- [x] `CHANGELOG.md` / `BREAKING.md` up to date — #<PR>
-- [x] CI, documentation and breakage checks are green — <checks summary comment>
-- [x] <stable: Resolves from General alone (`REL4`)>
-- [x] Release PR merged — <MERGE_SHA>
-- [x] GitHub release and tag created — <release URL>
-- [x] Registered — <General PR, merged | ct-registry commit>
+- ✅ Proposal validated: <stable|beta> `<VERSION>`, <supervised|autonomous>
+- ✅ <stable: Resolves from General alone (`REL4`)>
+- ✅ Release PR opened, the gate passed locally — #<PR>
+- ✅ Checks green (`release.jl ready`) — <checks summary comment>
+- ✅ Release PR merged — <MERGE_SHA>
+- ✅ Tag and GitHub release; documentation of the tag — <release URL>
+- ✅ Registered in <General | ct-registry> — <General PR, merged | ct-registry commit>
+- ✅ Issue closed
 
 Left as is: <anything, with the reason; or nothing>.
 Follow-ups: <downstream [compat] bumps (CompatHelper), issues to open; or none>.
