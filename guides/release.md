@@ -90,7 +90,7 @@ commit instead of the issue (when `main` moved after the merge).
 | 5 | Merge | agent or you | `release.jl merge`, at the exact commit it checked |
 | 6 | Tag and release | `ReleaseTag` workflow | the tag on the merge commit, the GitHub release with *What's Changed*, the docs of the tag |
 | 7 | Registration | agent | stable: one comment, then General's AutoMerge; beta: `LocalRegistry` into ct-registry |
-| 8 | Close | agent | the final comment, the issue closed, the branch deleted |
+| 8 | Close | agent | the final comment, the issue closed, the branch deleted, then `release.jl audit` |
 
 ## Following it
 
@@ -107,7 +107,11 @@ julia --startup-file=no CTActions/scripts/release/release.jl status --repo contr
 ```
 
 It reads GitHub and the registries, not a memory, and says the phase, the next action and
-what blocks it.
+what blocks it. Once the release is done, `release.jl audit --repo … --version …` checks
+that it left the trail the recipe asks for (a comment per phase, one registration mention,
+the PR merged without auto-merge and with release files only, the tag, the registry, the
+branch deleted); the agent runs it at the close, and you can run it on any release, whoever
+did it. It cannot see who acted.
 
 ## When the agent stops
 
