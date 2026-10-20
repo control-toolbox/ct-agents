@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
+### ✨ New Features
+
+- Phase 8 of [`recipes/release.md`](recipes/release.md) ends with `release.jl audit`
+  (CTActions#120): once `status` says *done*, the agent checks the trail the release left
+  (the comments of the issue, the one registration mention, the PR, the tag, the registry,
+  the deleted branch) and reports a ❌ to the human, never repairing the trail. The guide
+  tells a developer they can run it on any release.
+
 ## [0.2.0] - 2026-10-19
 
 ### 🔧 Changed

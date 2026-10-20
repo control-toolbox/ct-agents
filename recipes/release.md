@@ -108,7 +108,7 @@ version (phase 1), the mode (phase 1).
 | 5 | Merge | agent (`release.jl merge`) or the human | `release.jl ready` | the human merges |
 | 6 | Tag and GitHub release | the `ReleaseTag` workflow | `status` | — |
 | 7 | Registration | agent (stable: one comment; beta: LocalRegistry) | `status` | ⏸ before the comment |
-| 8 | Close | agent | `status` | — |
+| 8 | Close | agent | `status`, `release.jl audit` | — |
 
 ### 0. Preflight
 
@@ -365,8 +365,18 @@ git -C "$ROOT/$PKG" branch -D "release/v$VERSION"
 git -C "$ROOT/$PKG" push origin --delete "release/v$VERSION" 2>/dev/null   # if the merge kept it
 ```
 
-`status` must now say *done*. Report to the human: the version, the links, the stops and
-what was skipped.
+`status` must now say *done*. Then audit the trail the release left:
+
+```bash
+$TOOL audit --repo "$REPO" --version "$VERSION"
+```
+
+It reads GitHub and the registries, not this session: the comments of the issue, the one
+registration mention, the PR, the tag, the registry, the deleted branch. A ❌ is reported
+to the human with the rest, never repaired by editing the trail (an earlier comment is not
+edited, a mention is not removed): the release is done, the audit says what to look at.
+
+Report to the human: the version, the links, the stops, what was skipped, and the audit.
 
 ## Prerequisites in a package
 
