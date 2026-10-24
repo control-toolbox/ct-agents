@@ -86,6 +86,21 @@ version (phase 1), the mode (phase 1).
   that stopped the release), ending with the marker of
   [`release-issue.md`](release-issue.md#the-state-marker), for the reader: the state is
   recomputed by `status`, not read from the marker.
+- **One comment per phase, none skipped, in order.** The tracking issue holds the comments
+  of phases 1 (the proposal), 3, 4, 5, 6, 7 and 8, in this order. `release.jl audit` fails
+  on a missing one or on one out of order, and neither can be repaired afterwards (a
+  comment is never edited, and a late one is out of order). The one that gets forgotten is
+  **phase 7**: the registration comment the tool posts is not it (it carries the bot's
+  mention, no progress list and no marker). Before the comment of phase *N*, read the
+  markers already on the issue:
+
+  ```bash
+  gh issue view "$ISSUE" -R "$REPO" --json comments \
+    --jq '[.comments[].body | capture("ct-release phase=(?<p>[0-9]+)")? | .p] | join(" ")'
+  ```
+
+  It must list every phase before *N*; if one is missing, post it now, before the comment
+  of *N*, with the facts of its phase.
 - **The registration bot is never mentioned, except once** (`REL6`). Not in the issue
   description, the tracking comments, the PR, a commit message, the GitHub release or a
   report to the human; never for a beta. The registration comment builds the mention when
@@ -372,11 +387,22 @@ julia --startup-file=no --project=@ct-release -e '
 Then `status`: phase 8 once ct-registry holds the version, with the tree of the tag. In
 remote mode, this step runs in a job that has the `SSH_KEY` secret.
 
-Comment: the General PR and its merge, or the ct-registry commit.
+#### Comment of phase 7 — not optional
+
+Right after the registration is requested (stable: after `register --post`; beta: after
+`register(...)`), **before waiting for General** and before anything of phase 8, post the
+comment of phase 7 ([template](release-issue.md#phase-comments)), state `waiting`: the
+General PR (stable) or the ct-registry commit (beta), the registration requested, the
+progress list with the steps up to the tag marked ✅ and the registration not yet marked.
+The merge of the General PR is told in the final comment of phase 8, not in a second
+comment of phase 7. Phase 8 does not start until this comment is on the issue.
 
 ### 8. Close
 
-Ensure: `status` says phase 8, todo. Final comment ([template](release-issue.md#final-comment)):
+Ensure: `status` says phase 8, todo, **and the markers on the issue list phases 3 to 7**
+(the command of the ground rule above). If the comment of phase 7 is missing, post it now,
+**before** the final comment: the final one must be the last. Final comment
+([template](release-issue.md#final-comment)):
 the progress list, every step ✅ with its link, what was left as is and why, the follow-ups (downstream
 `[compat]`: CompatHelper opens those PRs). Then:
 

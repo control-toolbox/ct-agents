@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔧 Changed
+
+- [`recipes/release.md`](recipes/release.md): the comment of phase 7 is no longer forgotten.
+  It was a one-line `Comment:` at the end of a long section, after the registration, and
+  the registration comment posted by `release.jl register` was mistaken for it; the audit
+  then failed (CTModels v0.21.0, CTSolvers v0.7.0; CTBase v0.30.13 posted it after the
+  final comment). A ground rule lists the comments of the issue and gives the command that
+  reads the markers; phase 7 has its own step, right after the registration is requested;
+  phase 8 starts by checking that phases 3 to 7 are on the issue.
+
 ## [0.4.0] - 2026-10-24
 
 ### 🔧 Changed
