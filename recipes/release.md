@@ -226,14 +226,36 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
    ```
 
    Fix what it refuses (it says which rule), or stop if the fix is not a release-file edit.
-6. Push; open the PR; add the labels **after** creation (the label-gated callers react to
-   `labeled`). Never enable auto-merge.
+6. Push; open the PR; close it; add **all** the labels; reopen it. Never enable
+   auto-merge.
 
    ```bash
    gh pr create -R "$REPO" --base main --head "release/v$VERSION" \
      --title "chore: prepare $NAME v$VERSION release" --body-file "$PR_BODY"
+   gh pr close "$PR" -R "$REPO"
    gh pr edit "$PR" -R "$REPO" --add-label "<label>" ...
+   gh pr reopen "$PR" -R "$REPO"
    ```
+
+   **Why.** The label-gated callers react to `labeled`, `synchronize` and `reopened`. Labels
+   added one by one on an open PR fire one `labeled` event each, and the workflows that
+   several labels concern (documentation and its preview, the CI labels) start more than one
+   run on the same commit. Reopening the PR fires one `reopened` event, which reads the whole
+   label set: one run per workflow.
+
+   **Why it is safe.** A label event runs the workflows whether the PR is open or not, but
+   the first job of each (`guard.yml` of CTActions, rule 1) stops them when the PR is not
+   open, a few seconds:
+
+   ```yaml
+   - name: A pull request that is not open
+     if: github.event_name == 'pull_request' && github.event.pull_request.state != 'open'
+   ```
+
+   Only the reopening runs the tests. The gate (`ReleaseGate.yml`) is not label-gated and
+   runs on `reopened` too. See CTActions
+   [`docs/workflows/guard.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/guard.md).
+   The PR stays closed for seconds only; never leave it closed.
 
    `$PR_BODY`: what the release contains in two or three lines, `Refs #<issue>` (never
    `Closes`), the generation note.
