@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔧 Changed
+
+- Phase 3 of [`recipes/release.md`](recipes/release.md): the release PR is opened, closed,
+  given all its labels, then reopened, instead of getting its labels one by one on an open
+  PR. The `reopened` event reads the whole label set, so each workflow runs once on the
+  head commit; the label events on the closed PR stop at the first job of the callers
+  (`guard.yml` of CTActions, rule 1: a pull request that is not open).
+
 ## [0.3.0] - 2026-10-20
 
 ### ✨ New Features
