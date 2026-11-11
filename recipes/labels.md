@@ -45,7 +45,8 @@ are wired in the workflows (`WORKFLOWS.md` of CTActions), so keep them as they a
    grep -rn "<label name>" .github/ docs/ CONTRIBUTING.md README.md 2>/dev/null
    ```
 
-   A label named in a workflow (`if: contains(... 'run ci …')`), in `dependabot.yml`
+   A label named in a workflow (`if: contains(... 'run ci …')`, or `inputs.target == '…'` on the
+   label dispatch, where CTActions `scripts/label-dispatch/plan.sh` maps the label to the target), in `dependabot.yml`
    (`github_actions`, `dependencies`) or in an issue template must not be renamed or
    deleted without changing that file: report it instead.
 

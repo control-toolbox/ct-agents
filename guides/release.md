@@ -27,8 +27,9 @@ CTParser, CTLie and OptimalControl**. Check:
   versions applied (ct-agents, ct-conventions, CTActions): check them. A package that does
   not pin ct-agents yet is read from `main`.
 - **The package has the release workflows**: `ReleaseGate.yml`, `ReleaseTag.yml`, a
-  `Breakage.yml` on `breakage-suite.yml`, and a `Documentation.yml` that accepts
-  `workflow_dispatch`. The eight packages above have them. Without `ReleaseGate.yml`
+  `Breakage.yml` on `breakage-suite.yml`, a `Documentation.yml` that accepts
+  `workflow_dispatch`, and the label callers (`Labels.yml`, or the older `pull_request`
+  guards). The eight packages above have them. Without `ReleaseGate.yml`
   only `supervised` mode is offered.
 - **Your machine**: `git`, Julia 1.10 or later, the GitHub CLI logged in (`gh auth status`)
   with write access to the repository, and a clone of

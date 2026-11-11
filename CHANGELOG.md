@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔧 Changed
 
+- [`recipes/release.md`](recipes/release.md), [`guides/release.md`](guides/release.md),
+  [`recipes/labels.md`](recipes/labels.md): the label callers of a package may be the label
+  dispatch of CTActions (`Labels.yml`, and `CI.yml`, `Documentation.yml`, `Breakage.yml` on
+  `workflow_dispatch`) instead of `pull_request` callers with label guards. The open, close,
+  label, reopen sequence of phase 3 stays (one run per workflow); its explanation says how the
+  dispatch behaves and where the dispatched runs are (the Actions tab and commit statuses,
+  not the Checks tab).
 - [`recipes/release.md`](recipes/release.md): the comment of phase 7 is no longer forgotten.
   It was a one-line `Comment:` at the end of a long section, after the registration, and
   the registration comment posted by `release.jl register` was mistaken for it; the audit

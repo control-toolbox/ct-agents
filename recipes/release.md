@@ -252,24 +252,24 @@ In the worktree (`git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-releas
    gh pr reopen "$PR" -R "$REPO"
    ```
 
-   **Why.** The label-gated callers react to `labeled`, `synchronize` and `reopened`. Labels
-   added one by one on an open PR fire one `labeled` event each, and the workflows that
-   several labels concern (documentation and its preview, the CI labels) start more than one
-   run on the same commit. Reopening the PR fires one `reopened` event, which reads the whole
-   label set: one run per workflow.
+   **Why.** In a package on the label dispatch, `Labels.yml` (CTActions
+   [`label-dispatch.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/label-dispatch.md))
+   dispatches, on `labeled`, the workflow of the label just added and nothing else; on
+   `synchronize` and `reopened`, the workflow of every label the PR carries. Labels added
+   one by one on an open PR start one run each, and the workflows that several labels
+   concern (the documentation and its preview, the CI labels) start more than one run on the
+   same commit, the later one cancelling the earlier. Reopening the PR fires one
+   `reopened` event, which reads the whole label set: one run per workflow. (A package still
+   on `pull_request` callers has the same effect through its label guards.)
 
-   **Why it is safe.** A label event runs the workflows whether the PR is open or not, but
-   the first job of each (`guard.yml` of CTActions, rule 1) stops them when the PR is not
-   open, a few seconds:
-
-   ```yaml
-   - name: A pull request that is not open
-     if: github.event_name == 'pull_request' && github.event.pull_request.state != 'open'
-   ```
-
-   Only the reopening runs the tests. The gate (`ReleaseGate.yml`) is not label-gated and
-   runs on `reopened` too. See CTActions
-   [`docs/workflows/guard.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/guard.md).
+   **Why it is safe.** `label-dispatch.yml` dispatches nothing while the PR is not open, and
+   in a package still on `pull_request` callers the first job of each workflow
+   (`guard.yml` of CTActions, rule 1) stops it, a few seconds. Only the reopening runs the
+   tests. The gate (`ReleaseGate.yml`) is not label-gated and runs on `reopened` too. The runs
+   dispatched for the PR are in the Actions tab and as commit statuses of the PR, not in its
+   Checks tab; `release.jl ready` reads them from the runs of the branch. See CTActions
+   [`docs/workflows/label-dispatch.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/label-dispatch.md)
+   and [`docs/workflows/guard.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/guard.md).
    The PR stays closed for seconds only; never leave it closed.
 
    `$PR_BODY`: what the release contains in two or three lines, `Refs #<issue>` (never
@@ -433,6 +433,8 @@ locally:
 
 - the callers `ReleaseGate.yml`, `ReleaseTag.yml` and `Breakage.yml` on
   `breakage-suite.yml` (see CTActions' [workflows](https://github.com/control-toolbox/CTActions/blob/main/docs/README.md));
+- the label callers: `Labels.yml` with `CI.yml`, `Documentation.yml` and `Breakage.yml` on
+  `workflow_dispatch` (label dispatch), or the older `pull_request` callers with label guards;
 - `Documentation.yml` accepts `workflow_dispatch` (`ReleaseTag` runs it on the tag);
 - no repository setting: `release.jl ready` and `merge` read what ran, whatever the
   branch protection (see CTActions' [The merge](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-merge)).
