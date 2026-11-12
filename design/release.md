@@ -98,6 +98,18 @@ not at once, and a report can say which version of the procedure it applied. The
 bump in each package when a recipe changes in a way that matters. The release tool (CTActions)
 is not versioned yet: the proposal cites its commit.
 
+**13. Phases 4 to 8 can be a workflow, not a session.** They are mechanical, driven by
+`status`, and wait on a CI of tens of minutes: a session that waits spends its context for
+nothing, and one that ends loses nothing only because the state is recomputed. The
+`Release finish` workflow wakes on events (and hourly), reads `status`, does the one next
+action and stops. Two jobs hold the powers, the merge and the registration, in a GitHub
+Environment: in `supervised` mode a required reviewer approves each, in `autonomous` none.
+The agent holds neither the App's key nor the right to merge, and what it reads (PR titles,
+issues) may carry injected instructions. The opt-in is a label added by a release manager,
+checked from the events of the PR at every run; the merge is still `release.jl merge`.
+What needs a decision (`main` moved, `[merge approved]`, a bot error) never becomes
+automatic.
+
 ## What each safeguard answers
 
 | Safeguard | Failure it prevents, or one that happened |
@@ -111,9 +123,15 @@ is not versioned yet: the proposal cites its commit.
 | `REL4` on the lowest and the newest Julia | a stable that only a beta dependency satisfies |
 | The gate limits the diff to the release files | a release PR carrying other changes |
 | Base run required | a breakage verdict made against nothing |
+| The App's key only in the Environment of the privileged jobs | a job or a fork PR that could merge or register |
+| The opt-in read from the PR's events, with the role checked | someone who is not a release manager starting a release |
 
 ## Known limits
 
+- **The workflow has not run a release yet** (CTActions#154): the first one is CTParser's.
+  Not verified: that the registration bot takes a comment of the App, and `workflow_run`
+  after a run dispatched with `GITHUB_TOKEN`. The beta path (`release.jl register-beta`)
+  is tested on fakes only (CTActions#132).
 - **Each mode has run once**: `autonomous` on CTBase v0.30.12 (Claude Code), `supervised`
   on CTModels v0.20.0 (another agent, which found the recipe from `AGENTS.md` alone). Its
   feedback, step by step, is on CTModels.jl#476; it led to the three stops of `supervised`

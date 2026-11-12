@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   who finishes; at the end of phase 3 the agent adds the label `release: supervised` or
   `release: autonomous` (only a release manager's label counts) and stops. Same tool, same
   comments, same stops, same audit.
+- [`guides/release.md`](guides/release.md): a section "Who does what", with one table per
+  mode (agent, workflow, you), "When the workflow stops", and the link to CTActions'
+  `release-finish.md`; [`design/release.md`](design/release.md): choice 13 (phases 4 to 8 as
+  a workflow), its safeguards and its limits.
 
 ### 🔧 Changed
 
