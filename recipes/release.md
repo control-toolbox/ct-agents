@@ -72,7 +72,44 @@ version and the mode are always asked) and then only on a stop condition.
 `supervised`, and say why.
 
 **Always asked, whatever the mode:** the kind (stable or beta, when not given), the
-version (phase 1), the mode (phase 1).
+version (phase 1), the mode (phase 1), and, when the package has `ReleaseFinish.yml`, who
+finishes (phase 1, below).
+
+## Who finishes: the agent or the workflow
+
+Phases 4 to 8 are mechanical: waiting for the checks, merging with `release.jl merge`,
+waiting for the tag, registering, closing. When the package has the caller
+`ReleaseFinish.yml` (CTActions
+[`release-finish.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md)),
+a workflow can do them instead of a session that waits for tens of minutes. Ask in phase 1:
+**the agent finishes, or the workflow?** Offer the workflow first when it is there.
+
+The workflow follows the same rules (the same tool, the same comments with their markers,
+the same stops; `release.jl audit` reads the same trail) and the same modes:
+
+| | `supervised` | `autonomous` |
+| --- | --- | --- |
+| Label on the release PR | `release: supervised` | `release: autonomous` |
+| The merge and the registration | wait for an approval of the environment `release` (*Review deployments* on the run of `ReleaseFinish.yml`) | run without one |
+
+`--on-commit`, `[merge approved]` and an error of the registration bot stay with a person in
+both modes: the workflow comments `⏸ waiting for you` on the issue and goes on once the
+facts change.
+
+**Handing over**, at the end of phase 3, once the PR is reopened with its labels and the
+comment of phase 3 is posted:
+
+```bash
+gh pr edit "$PR" -R "$REPO" --add-label "release: $MODE"
+```
+
+Only a release manager's label counts (the organization variable `CT_RELEASE_MANAGERS`, with
+the `admin` or `maintain` role): a local agent adds it with the human's credentials; an
+agent with its own identity asks the human to add it. Then report to the human (the PR,
+the issue, the mode, what they will be asked to approve) and **stop**: the session does
+nothing after phase 3. The workflow posts the comments of phases 4 to 8. To resume by hand
+(a stop the workflow reported), remove the label first, then follow phases 4 to 8 below
+from `status`.
 
 ## Ground rules
 
@@ -436,6 +473,9 @@ locally:
 - the label callers: `Labels.yml` with `CI.yml`, `Documentation.yml` and `Breakage.yml` on
   `workflow_dispatch` (label dispatch), or the older `pull_request` callers with label guards;
 - `Documentation.yml` accepts `workflow_dispatch` (`ReleaseTag` runs it on the tag);
+- to hand phases 4 to 8 to the workflow: `ReleaseFinish.yml`, its environments and the
+  labels `release: supervised` and `release: autonomous` (see CTActions'
+  [setting it up](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md#setting-it-up));
 - no repository setting: `release.jl ready` and `merge` read what ran, whatever the
   branch protection (see CTActions' [The merge](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-merge)).
 

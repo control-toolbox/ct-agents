@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+- [`recipes/release.md`](recipes/release.md), [`recipes/release-issue.md`](recipes/release-issue.md):
+  phases 4 to 8 can be handed to the workflow `release-finish.yml` of CTActions
+  (control-toolbox/CTActions#128) when the package has `ReleaseFinish.yml`. The proposal asks
+  who finishes; at the end of phase 3 the agent adds the label `release: supervised` or
+  `release: autonomous` (only a release manager's label counts) and stops. Same tool, same
+  comments, same stops, same audit.
+
 ### 🔧 Changed
 
 - [`recipes/release.md`](recipes/release.md), [`guides/release.md`](guides/release.md),
