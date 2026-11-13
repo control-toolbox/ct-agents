@@ -72,44 +72,68 @@ version and the mode are always asked) and then only on a stop condition.
 `supervised`, and say why.
 
 **Always asked, whatever the mode:** the kind (stable or beta, when not given), the
-version (phase 1), the mode (phase 1), and, when the package has `ReleaseFinish.yml`, who
-finishes (phase 1, below).
+version (phase 1), the mode (phase 1), and, when the package has `Release.yml`, who does
+phases 2 to 8 (phase 1, below).
 
-## Who finishes: the agent or the workflow
+## Who does phases 2 to 8: the workflow or the agent
 
-Phases 4 to 8 are mechanical: waiting for the checks, merging with `release.jl merge`,
-waiting for the tag, registering, closing. When the package has the caller
-`ReleaseFinish.yml` (CTActions
-[`release-finish.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md)),
+Phases 2 to 8 are mechanical: the tracking issue, the release PR, waiting for the checks,
+merging with `release.jl merge`, waiting for the tag, registering, closing. When the package
+has the caller `Release.yml` (CTActions
+[`release.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release.md)),
 a workflow can do them instead of a session that waits for tens of minutes. Ask in phase 1:
-**the agent finishes, or the workflow?** Offer the workflow first when it is there.
+**the workflow does them, or the agent?** Offer the workflow first when it is there. The
+value of the agent is in phases 0 and 1: the review and the proposal.
 
 The workflow follows the same rules (the same tool, the same comments with their markers,
 the same stops; `release.jl audit` reads the same trail) and the same modes:
 
 | | `supervised` | `autonomous` |
 | --- | --- | --- |
-| Label on the release PR | `release: supervised` | `release: autonomous` |
-| The merge and the registration | wait for an approval of the environment `release` (*Review deployments* on the run of `ReleaseFinish.yml`) | run without one |
+| Environment of the privileged jobs (PR, merge, registration) | `release`: a required reviewer approves each (*Review deployments* on the run of `Release.yml`) | `release-autonomous`: none |
+| Label the workflow puts on the release PR | `release: supervised` | `release: autonomous` |
+
+**The request.** At the end of phase 1, once the human has validated the version and the
+mode, the agent works on a branch `release/v$VERSION` and writes the request, with the facts
+of the tool, not from memory:
+
+```bash
+git -C "$ROOT/$PKG" worktree add "$ROOT/.worktrees/$PKG-release" -b "release/v$VERSION" origin/main
+cd "$ROOT/.worktrees/$PKG-release"
+$TOOL facts --repo "$REPO" --kind "$KIND" .       # the facts, and the skeleton .releases/vX.toml
+# review every candidate: a verdict and a note each; add to [Unreleased] what is missing;
+# fill `mode` and `requested_by`; write the proposal as validated in .releases/vX.md
+$TOOL request --repo "$REPO" ".releases/v$VERSION.toml" .
+```
+
+`facts` never judges: it computes the expected version, the reference, `REL4`, `REL7` and
+lists the candidates (a merged PR cited nowhere in the changelog, an export that went
+missing, a dependency or a `[compat]` bound that moved) that the agent decides on: `covered`,
+`added`, or `not-user-facing`. `request` checks the request against the facts computed again
+(the version is the expected one, `main` has not moved, every candidate has a verdict and a
+note, nothing mentions the registration bot), commits it with the changelog changes on
+`release/v$VERSION`, pushes, and starts `Release.yml`. **`main` need not be green yet**: the
+workflow waits for it. Then report to the human (the issue, the mode, what they will be asked
+to approve) and **stop**: the session does nothing after the request. The workflow posts
+the comments of phases 2 to 8.
 
 `--on-commit`, `[merge approved]` and an error of the registration bot stay with a person in
 both modes: the workflow comments `⏸ waiting for you` on the issue and goes on once the
-facts change.
+facts change. **The registration comment** is posted, in both modes, with the token
+`CT_RELEASE_REGISTRATION_TOKEN` of a release manager (a public member of the organization:
+the registration bot takes no comment of the App). Without the token, or if the bot refuses
+it, the workflow shows the comment for a person to post once, with the bot's name written
+`@'JuliaRegistrator`: whoever posts it removes the apostrophe. A refused comment registered
+nothing and does not count for `REL6`.
 
-**Handing over**, at the end of phase 3, once the PR is reopened with its labels and the
-comment of phase 3 is posted:
+**A release PR opened without a request** (a person, or the agent following the phases
+below) can be handed over by a label: a release manager adds `release: supervised` or
+`release: autonomous` and the workflow takes it from phase 4. Only a release manager's label
+counts (the organization variable `CT_RELEASE_MANAGERS`, with the `admin` or `maintain` role
+on the repository). To resume by hand (a stop the workflow reported), remove the label
+first, then follow phases 4 to 8 below from `status`.
 
-```bash
-gh pr edit "$PR" -R "$REPO" --add-label "release: $MODE"
-```
-
-Only a release manager's label counts (the organization variable `CT_RELEASE_MANAGERS`, with
-the `admin` or `maintain` role): a local agent adds it with the human's credentials; an
-agent with its own identity asks the human to add it. Then report to the human (the PR,
-the issue, the mode, what they will be asked to approve) and **stop**: the session does
-nothing after phase 3. The workflow posts the comments of phases 4 to 8. To resume by hand
-(a stop the workflow reported), remove the label first, then follow phases 4 to 8 below
-from `status`.
+The phases below are those the agent follows when it does the whole release itself.
 
 ## Ground rules
 
@@ -382,7 +406,9 @@ $TOOL register --repo "$REPO" --version "$VERSION" --post   # once
 ```
 
 `register` refuses unless `status` says phase 7, todo, so it never posts twice; it checks
-afterwards that there is one mention. Never post the comment by hand.
+afterwards that there is one live mention (a refused one registered nothing and is not
+counted). Never post the comment by hand, except the one the tool hands over, with the
+mention written `@'JuliaRegistrator`, when the bot refused it.
 
 **`main` moved past the merge commit** (another PR was merged before the registration):
 asked on the issue, the bot would register the head of `main`, not the tagged commit.
@@ -473,9 +499,10 @@ locally:
 - the label callers: `Labels.yml` with `CI.yml`, `Documentation.yml` and `Breakage.yml` on
   `workflow_dispatch` (label dispatch), or the older `pull_request` callers with label guards;
 - `Documentation.yml` accepts `workflow_dispatch` (`ReleaseTag` runs it on the tag);
-- to hand phases 4 to 8 to the workflow: `ReleaseFinish.yml`, its environments and the
-  labels `release: supervised` and `release: autonomous` (see CTActions'
-  [setting it up](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md#setting-it-up));
+- to hand phases 2 to 8 to the workflow: `Release.yml`, its environments and the
+  labels `release: supervised` and `release: autonomous` (CTActions'
+  [setting it up](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release.md#setting-it-up),
+  one command: `scripts/release/setup.sh`);
 - no repository setting: `release.jl ready` and `merge` read what ran, whatever the
   branch protection (see CTActions' [The merge](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-merge)).
 

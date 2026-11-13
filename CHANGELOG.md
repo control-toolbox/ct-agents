@@ -10,15 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ New Features
 
 - [`recipes/release.md`](recipes/release.md), [`recipes/release-issue.md`](recipes/release-issue.md):
-  phases 4 to 8 can be handed to the workflow `release-finish.yml` of CTActions
-  (control-toolbox/CTActions#128) when the package has `ReleaseFinish.yml`. The proposal asks
-  who finishes; at the end of phase 3 the agent adds the label `release: supervised` or
-  `release: autonomous` (only a release manager's label counts) and stops. Same tool, same
-  comments, same stops, same audit.
+  phases 2 to 8 can be handed to the workflow `release.yml` of CTActions (control-toolbox/CTActions#128)
+  when the package has `Release.yml`. The proposal asks who does them; the agent reviews the
+  candidates of `release.jl facts`, writes the request `.releases/vX.toml` and the proposal
+  `.releases/vX.md`, runs `release.jl request` and stops. Same tool, same comments, same
+  stops, same audit.
+- [`recipes/release.md`](recipes/release.md): the registration comment is posted with the
+  token of a release manager (`CT_RELEASE_REGISTRATION_TOKEN`); without it, or if the bot
+  refuses, it is handed to a person with the bot's name written `@'JuliaRegistrator`. A
+  refused comment does not count for `REL6`.
 - [`guides/release.md`](guides/release.md): a section "Who does what", with one table per
-  mode (agent, workflow, you), "When the workflow stops", and the link to CTActions'
-  `release-finish.md`; [`design/release.md`](design/release.md): choice 13 (phases 4 to 8 as
-  a workflow), its safeguards and its limits.
+  mode (agent, workflow, you), "The registration comment", "When the workflow stops", and the
+  link to CTActions' `release.md`; [`design/release.md`](design/release.md): choices 13 (phases
+  2 to 8 as a workflow) and 14 (the registration comment is a person's), their safeguards and
+  limits.
 
 ### 🔧 Changed
 

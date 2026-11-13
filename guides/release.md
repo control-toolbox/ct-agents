@@ -15,10 +15,10 @@ the procedure the agent follows is [`recipes/release.md`](../recipes/release.md)
    answer two questions: is the version right, and `supervised` or `autonomous`?
 4. Follow the tracking issue it opens. In `supervised` mode you merge the release PR and
    give the go for the registration; in `autonomous` mode you do nothing unless it stops.
-5. If the package has `ReleaseFinish.yml`, the proposal also asks **who finishes**: the
-   agent, or the `Release finish` workflow of CTActions. With the workflow, the session
-   stops once the release PR is open and carries its label; the workflow does the rest and
-   comments on the issue. See [Who does what](#who-does-what).
+5. If the package has `Release.yml`, the proposal also asks **who does phases 2 to 8**: the
+   agent, or the `Release` workflow of CTActions. With the workflow, the session writes the
+   request (`.releases/vX.toml`: the facts, a verdict on each candidate change) and stops;
+   the workflow does the rest and comments on the issue. See [Who does what](#who-does-what).
 
 ## Before you start
 
@@ -79,7 +79,7 @@ A first release: use `supervised`. Each mode has run once: `autonomous` on CTBas
 stops, the agent goes on by itself: opening the tracking issue, the release PR and waiting
 for the checks do not need your go.
 
-With `ReleaseFinish.yml` in the package, the same two modes apply to the workflow: the
+With `Release.yml` in the package, the same two modes apply to the workflow: the
 approvals of the merge and of the registration are clicks on the run
 ([Who does what](#who-does-what)).
 
@@ -106,54 +106,66 @@ the next section says who does what.
 
 ## Who does what
 
-Phases 4 to 8 are mechanical, and an agent that waits for a CI of tens of minutes burns its
-context for nothing. When the package has `ReleaseFinish.yml` (CTActions
-[`release-finish.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md)),
-you can hand them to a workflow. The label the agent puts on the release PR is the
-hand-over: `release: supervised` or `release: autonomous`. Only the label of a release
-manager counts (the organization variable `CT_RELEASE_MANAGERS`, with the `admin` or
-`maintain` role on the repository). Without the label, nothing happens and the agent can
-finish as before.
+Phases 2 to 8 are mechanical, and an agent that waits for a CI of tens of minutes burns its
+context for nothing. When the package has `Release.yml` (CTActions
+[`release.yml`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release.md)),
+you can hand them to a workflow. The hand-over is the **request**, `.releases/vX.toml`: the
+agent writes it from the facts of the tool (`release.jl facts`), and `release.jl request`
+checks it, commits it on `release/vX` and starts the workflow. The workflow acts only for a
+release manager (the organization variable `CT_RELEASE_MANAGERS`, with the `admin` or
+`maintain` role on the repository). Without `Release.yml`, the agent does it all, as above.
 
-**The agent holds no power over the release once it has handed over**: the merge and the
-registration are done by two jobs of the workflow, in a GitHub Environment whose secrets
-hold the key of the App `ct-release`.
+**The agent holds no power over the release once it has handed over**: the PR, the merge and
+the registration are done by three jobs of the workflow, in a GitHub Environment whose
+secrets hold the key of the App `ct-release`.
 
 ### `supervised`
 
 | Phase | Agent (session) | Workflow | You |
 | --- | --- | --- | --- |
-| 0. Preflight | state of `main`, versions, changelog, `REL4`, `REL7`, open PRs | | |
-| 1. Proposal | writes it | | **validate the version; choose stable or beta, the mode, who finishes** |
-| 2. Tracking issue | opens it | | |
-| 3. Release PR | release files, local gate, PR, run labels | | |
-| Hand-over | adds `release: supervised`, reports, **stops** | | |
+| 0. Preflight | `release.jl facts`: state of `main`, versions, `REL4`, `REL7`, the candidates; open PRs | | |
+| 1. Proposal | writes it | | **validate the version; choose stable or beta, the mode, who does the rest** |
+| Request | reviews each candidate, writes `.releases/vX.toml` and `vX.md`, runs `release.jl request`, **stops** | | |
+| 2. Tracking issue | | opens it from the request | |
+| 3. Release PR | | waits for the CI of `main`, then release files, gate, PR, label `release: supervised` | **click *Review deployments***, a first time |
 | 4. Checks | | waits for the CI, reads `release.jl ready`, comments ✅ or ❌ | |
 | 5. Merge | | asks for an approval, then `release.jl merge` as the App | **click *Review deployments*** (or merge by hand: the workflow sees it) |
 | 6. Tag and release | | `ReleaseTag` tags and releases; comments | |
-| 7. Registration | | asks for an approval, posts the registration comment once (stable) or registers in ct-registry (beta), follows General's PR | **click *Review deployments***; **comment `[merge approved]` on General's PR** if the version jumps over betas |
+| 7. Registration | | asks for an approval, then posts the registration comment once (stable, as the owner of `CT_RELEASE_REGISTRATION_TOKEN`) or registers in ct-registry (beta), follows General's PR | **click *Review deployments***; **comment `[merge approved]` on General's PR** if the version jumps over betas |
 | 8. Close | | final comment, issue closed, branch deleted, `release.jl audit` | |
+
+The comment of each stop says what to click, with the link to the run that waits.
 
 ### `autonomous`
 
 | Phase | Agent (session) | Workflow | You |
 | --- | --- | --- | --- |
-| 0 to 3 | as in `supervised` | | validate the proposal (version, mode) |
-| Hand-over | adds `release: autonomous`, **stops** | | |
-| 4. Checks | | as in `supervised` | |
+| 0, 1, request | as in `supervised` | | validate the proposal (version, mode) |
+| 2 to 4 | | as in `supervised` | |
 | 5. Merge | | `release.jl merge`, **no approval** (environment `release-autonomous`) | |
 | 6. Tag and release | | as in `supervised` | |
 | 7. Registration | | registration comment, **no approval**; follows General's PR | **`[merge approved]`** if the version jumps over betas |
 | 8. Close | | as in `supervised` | |
 
+### The registration comment
+
+The registration bot takes a comment from a **public member** of the organization, not from
+a GitHub App: so the comment is posted with `CT_RELEASE_REGISTRATION_TOKEN`, the token of a
+release manager (a secret of the environment of each package, set by CTActions'
+`scripts/release/setup.sh`). Without it, or if the bot still refuses, the workflow stops
+with the comment ready to copy, the bot's name written `@'JuliaRegistrator`: **remove the
+apostrophe** and post it once. Never write the bot's name in any other comment, even quoted:
+it triggers a registration wherever it appears.
+
 ### What stays with you in both modes
 
-- Validating the proposal, and adding the label (the only trigger).
+- Validating the proposal.
 - The decisions the workflow never takes: `main` moved after the merge (the registration
   comment must go on the merge commit, `release.jl register --on-commit`); `[merge approved]`
-  on General's PR; an error answer of the registration bot (never posted again); a check
-  that failed; `status` saying *blocked*. The workflow comments `⏸ waiting for you` or ❌ on
-  the issue, with the reason and the output of `status`, and goes on when the facts change.
+  on General's PR; an error answer of the registration bot (never posted again by the
+  workflow: you post the comment); a check that failed; `status` saying *blocked*. The
+  workflow comments `⏸ waiting for you` or ❌ on the issue, with the reason and the output of
+  `status`, and goes on when the facts change.
 
 Other actors: the CI of the package produces what `ready` reads; the registration bot and
 General's AutoMerge open and merge General's PR, which the workflow follows without acting on it.
@@ -199,7 +211,7 @@ It stops, and comments on the issue, when:
 It comments on the tracking issue and stops, once per reason, when `status` says *blocked*,
 a check failed, or a job the release needs did not run (**❌**); and it waits (**⏸ waiting
 for you**) for the decisions of the list above. Fix the cause, then the next event, the
-hourly run or a run of `ReleaseFinish.yml` by hand goes on from the facts. To finish a
+hourly run or a run of `Release.yml` by hand goes on from the facts. To finish a
 release by hand instead (a session, a human), remove the label `release: …` from the PR
 first, then follow [Resuming](#resuming).
 
@@ -259,5 +271,5 @@ hand: it triggers a registration wherever it appears.
 | Why it is built this way, and its limits | [`design/release.md`](../design/release.md) |
 | The rules `REL1`–`REL7` | [ct-conventions `rules/release.md`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/release.md) |
 | The tool, the gate, the tag, the breakage suite | [CTActions `docs/workflows/`](https://github.com/control-toolbox/CTActions/tree/main/docs/workflows): `release-gate.md`, `release-tag.md`, `breakage-suite.md` |
-| The workflow that finishes a release: the jobs, the opt-in, the App, setting it up | [CTActions `docs/workflows/release-finish.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-finish.md) |
+| The workflow that runs a release from its request: the jobs, the modes, the App, the token, setting it up | [CTActions `docs/workflows/release.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release.md) |
 | The two registries | [ct-registry `RELEASING.md`](https://github.com/control-toolbox/ct-registry/blob/HEAD/RELEASING.md) |

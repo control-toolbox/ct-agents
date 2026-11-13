@@ -58,7 +58,7 @@ Every step starts from `release.jl status`: if anything interrupts the release, 
 - <jump: comment `[merge approved]` on the General PR, or let the agent do it>
 - <anything else: none>
 
-**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails; <available: the package has `ReleaseGate.yml`, and the agent merges only with `release.jl merge` | not available: <why>>)? <when the package has `ReleaseFinish.yml`: Who finishes phases 4 to 8: the `Release finish` workflow (the session stops after the release PR; in `supervised` mode you approve the merge and the registration on its runs) or the agent?>
+**Questions.** Is `<VERSION>` right? Mode: `supervised` (the agent stops at each checkpoint) or `autonomous` (it goes on unless something fails; <available: the package has `ReleaseGate.yml`, and the agent merges only with `release.jl merge` | not available: <why>>)? <when the package has `Release.yml`: Who does phases 2 to 8: the `Release` workflow (the session stops once the request is sent; in `supervised` mode you approve the PR, the merge and the registration on its runs) or the agent?>
 ````
 
 ## Issue description
