@@ -13,7 +13,7 @@ This file says who does what, in which order. The texts the agent posts are in
 
 1. **Checked by tools, not by care.** Every rule that a tool can decide is decided by the
    release tool of CTActions,
-   [`scripts/release/release.jl`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release-gate.md#the-release-tool),
+   [`scripts/release/release.jl`](https://github.com/control-toolbox/CTActions/blob/main/docs/tools/release-cli.md),
    and the merge itself goes through it: `release.jl merge` checks what actually ran on the
    head commit of the PR — the release gate (`REL1`–`REL7`), the breakage report (`REL1`
    against the base), every job the release needs — and only then merges, at that commit.

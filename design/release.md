@@ -117,7 +117,9 @@ GitHub App, only of a public member of the organization. So the workflow posts i
 token of a release manager when there is one (an environment secret, read only after the
 approval of the environment), and otherwise shows it for a person to post, the bot's name
 written with an apostrophe that they remove. A comment the bot refused registered nothing:
-it does not count for `REL6`.
+it does not count for `REL6`. The identities of a release (`GITHUB_TOKEN`, the App
+`ct-release`, this token), why each and what it costs, are recorded in CTActions
+[`docs/design/release-identities.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/design/release-identities.md).
 
 ## What each safeguard answers
 
