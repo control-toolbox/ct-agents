@@ -98,6 +98,27 @@ not at once, and a report can say which version of the procedure it applied. The
 bump in each package when a recipe changes in a way that matters. The release tool (CTActions)
 is not versioned yet: the proposal cites its commit.
 
+**13. Phases 2 to 8 can be a workflow, not a session.** They are mechanical, driven by
+`status`, and wait on a CI of tens of minutes: a session that waits spends its context for
+nothing, and one that ends loses nothing only because the state is recomputed. The value of
+the agent is in phases 0 and 1: the review and the proposal. It hands over by a **request**,
+`.releases/vX.toml`, built from the facts of the tool (which lists the candidates and never
+judges) and checked against them again. The `Release` workflow wakes on events (and hourly),
+reads `status`, does the one next action and stops. Three jobs hold the powers, the PR, the
+merge and the registration, in a GitHub Environment: in `supervised` mode a required reviewer
+approves each, in `autonomous` none. The agent holds neither the App's key nor the right to
+merge, and what it reads (PR titles, issues) may carry injected instructions. Who may start a
+release is checked from the facts at every run (a release manager, with the `admin` or
+`maintain` role); the merge is still `release.jl merge`. What needs a decision (`main` moved,
+`[merge approved]`, a bot error) never becomes automatic.
+
+**14. The registration comment is a person's.** The registration bot takes no comment of a
+GitHub App, only of a public member of the organization. So the workflow posts it with the
+token of a release manager when there is one (an environment secret, read only after the
+approval of the environment), and otherwise shows it for a person to post, the bot's name
+written with an apostrophe that they remove. A comment the bot refused registered nothing:
+it does not count for `REL6`.
+
 ## What each safeguard answers
 
 | Safeguard | Failure it prevents, or one that happened |
@@ -111,9 +132,16 @@ is not versioned yet: the proposal cites its commit.
 | `REL4` on the lowest and the newest Julia | a stable that only a beta dependency satisfies |
 | The gate limits the diff to the release files | a release PR carrying other changes |
 | Base run required | a breakage verdict made against nothing |
+| The App's key only in the Environment of the privileged jobs | a job or a fork PR that could merge or register |
+| The opt-in read from the PR's events, with the role checked | someone who is not a release manager starting a release |
 
 ## Known limits
 
+- **The workflow has run one release**: CTParser v0.9.6, supervised. It showed that the
+  registration bot refuses a comment of the App (hence choice 14), that a run reads a split
+  CI per job, and that a cancelled run is no verdict. The beta path (`release.jl
+  register-beta`) is tested on fakes only (CTActions#132), and `autonomous` has not run with
+  the workflow.
 - **Each mode has run once**: `autonomous` on CTBase v0.30.12 (Claude Code), `supervised`
   on CTModels v0.20.0 (another agent, which found the recipe from `AGENTS.md` alone). Its
   feedback, step by step, is on CTModels.jl#476; it led to the three stops of `supervised`
