@@ -272,4 +272,5 @@ hand: it triggers a registration wherever it appears.
 | The rules `REL1`–`REL7` | [ct-conventions `rules/release.md`](https://github.com/control-toolbox/ct-conventions/blob/main/rules/release.md) |
 | The tool, the gate, the tag, the breakage suite | [CTActions `docs/workflows/`](https://github.com/control-toolbox/CTActions/tree/main/docs/workflows): `release-gate.md`, `release-tag.md`, `breakage-suite.md` |
 | The workflow that runs a release from its request: the jobs, the modes, the App, the token, setting it up | [CTActions `docs/workflows/release.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/workflows/release.md) |
+| Who acts in a release (the App, the tokens) and why | [CTActions `docs/design/release-identities.md`](https://github.com/control-toolbox/CTActions/blob/main/docs/design/release-identities.md) |
 | The two registries | [ct-registry `RELEASING.md`](https://github.com/control-toolbox/ct-registry/blob/HEAD/RELEASING.md) |
